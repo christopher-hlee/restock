@@ -44,3 +44,8 @@ indistinguishable from a quiet one. `monitor/tests/test_statemachine.py` pins it
   IP banned is the real risk, not CPU.
 - Never commit `.env`. Secrets are generated on the server.
 - Run tests before pushing: `monitor/venv/bin/python -m pytest monitor/tests -c monitor/pytest.ini`
+- Push to `main` of christopher-hlee/restock; the server deploys every push
+  there within five minutes. The old `claude/ionos-vps-product-monitor-gflhfy`
+  branch of Link-VST is retired — nothing reads it.
+- `python3 ui-check.py` checks the dashboard in a real browser at five widths;
+  the `verify` workflow also reports which build the live server is running.
