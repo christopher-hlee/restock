@@ -5,6 +5,11 @@ name: suggestions
 
 on:
   workflow_dispatch:
+    inputs:
+      hosts:
+        description: "Space-separated hosts to check (blank = every candidate)"
+        required: false
+        default: ""
 
 jobs:
   check:
@@ -12,7 +17,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - run: python3 check-suggestions.py
+      - run: python3 check-suggestions.py ${{ inputs.hosts }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

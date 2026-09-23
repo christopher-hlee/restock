@@ -74,7 +74,8 @@ def check(name, host, city):
     base = f"https://{host}"
     status, data = get(f"{base}/products.json?limit=250")
     out = {"name": name, "host": host, "city": city, "status": status,
-           "open": False, "products": 0, "brands": {}, "sale": None}
+           "open": False, "products": 0, "brands": {}, "vendors": {},
+           "sale": None}
     if not (status == 200 and isinstance(data, dict)
             and isinstance(data.get("products"), list)):
         return out
@@ -93,6 +94,10 @@ def check(name, host, city):
         for brand, needles in BRANDS.items():
             if any(n in vendor for n in needles):
                 out["brands"][brand] = out["brands"].get(brand, 0) + 1
+                # The exact spelling, because a vendor filter matches it
+                # exactly: "Yohji Yamamoto POUR HOMME" is not "Yohji Yamamoto".
+                exact = (p.get("vendor") or "").strip()
+                out["vendors"][exact] = out["vendors"].get(exact, 0) + 1
     time.sleep(1.2)
     s_status, s_data = get(f"{base}/collections/sale/products.json?limit=1")
     out["sale"] = (s_status == 200 and isinstance(s_data, dict)
@@ -101,14 +106,18 @@ def check(name, host, city):
 
 
 def main():
+    only = set(sys.argv[1:])
     results = []
     for name, host, city in CANDIDATES:
+        if only and host not in only:
+            continue
         r = check(name, host, city)
         results.append(r)
         brands = ", ".join(f"{b} {n}" for b, n in sorted(r["brands"].items(),
                                                          key=lambda x: -x[1]))
         print(f"{'OPEN ' if r['open'] else 'SHUT '} {name:24} {str(r['status']):>5}"
-              f"  {r['products']:>5} products  sale={r['sale']}  {brands}",
+              f"  {r['products']:>5} products  sale={r['sale']}  {brands}"
+              f"  vendors={json.dumps(r['vendors'], ensure_ascii=False)}",
               flush=True)
         time.sleep(1.5)
     with open("suggestions-checked.json", "w") as f:
