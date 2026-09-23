@@ -57,6 +57,18 @@ applied before the page paints, so a light choice never flashes dark. Every
 colour in the page is a token with a light value, and `ui-check.py` switches
 each width to light and fails on any text under 4.5:1 contrast.
 
+### Stores you might watch
+
+Under the watch list, a short list of stores this app can actually watch and
+that carry the brands you buy. Each one was checked from a GitHub runner by
+`check-suggestions.py`: its `/products.json` answered, and the brand counts
+come from the vendor field of what it stocks, not a stockist list. **Watch
+new** and **Watch sale** open the usual Add sheet already filled in, with a
+vendor filter in the store's own spelling (Neighbour sells "Comoli Mens"), so
+you hear about your brands rather than every arrival. A store drops off the
+list once you watch any part of it. Refresh the counts by running the
+`suggestions` workflow.
+
 ### On a phone
 
 The phone gets its own layout rather than the desktop one squeezed:

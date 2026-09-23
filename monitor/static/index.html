@@ -245,6 +245,19 @@ a.item-title:hover{color:var(--accent)}
   width:auto;min-width:76px;padding:0 16px;min-height:44px;text-decoration:none}
 .item-acts .x{width:44px;height:44px}
 
+/* Stores worth adding. Checked, not guessed: each one's catalogue answered
+   this app, and the brands listed are counted from what it actually stocks. */
+.sugg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 18px;align-items:center;
+  padding:14px 0;border-top:1px solid var(--rule-faint)}
+.sugg:last-child{border-bottom:1px solid var(--rule-faint)}
+.sugg .sn{font-family:var(--serif);font-size:18px;color:var(--bright);overflow-wrap:anywhere}
+.sugg .sn .k{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:3px}
+.sugg .sb{font-size:12px;color:var(--held);grid-column:1}
+.sugg .sb b{color:var(--text-dim);font-weight:500}
+.sugg .sa{display:flex;gap:8px;grid-row:1/span 2;grid-column:2}
+.sugg .sa .chip{flex:none;width:auto;padding:0 14px;min-height:40px}
+
 .feed{display:grid;grid-template-columns:96px 150px 1fr 26px;gap:18px;align-items:baseline;
   padding:11px 0;border-top:1px solid var(--rule-faint)}
 .feed .fw{font-size:12px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;
@@ -378,6 +391,8 @@ a.item-title:hover{color:var(--accent)}
      it under the title instead of hiding it. */
   .fired .fp{grid-column:1;font-size:13px;color:var(--muted)}
   .fired .ft{grid-column:1;font-size:10px}
+  .sugg .sa{grid-row:auto;grid-column:1/-1}
+  .sugg .sa .chip{flex:1;min-height:44px}
   .feed{grid-template-columns:auto 1fr 44px;gap:4px 12px}
   /* Ellipsis on a 430px column leaves "www.ninte…", which names nothing.
      Wrapping costs a line and keeps the row readable. */
@@ -493,8 +508,9 @@ function toggleTheme() {
 paintThemeButtons();
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let WATCHES = [], EVENTS = [], BUCKETS = [], TIMER = null, INTENT = 'restock';
+let WATCHES = [], EVENTS = [], BUCKETS = [], SUGGESTED = [], TIMER = null, INTENT = 'restock';
 let OPEN_BUCKET = null, OPEN_SIG = '';
+let PENDING_FILTER = null;   // a suggested store's brand filter, until saved
 
 function toast(msg, kind = '') {
   const t = document.createElement('div');
@@ -1157,6 +1173,14 @@ function render() {
     html += `<div class="group-label">Waiting · ${waiting.length} · nothing to do</div>
       <div>${waiting.map(waitRow).join('')}</div>`;
   }
+  /* Somewhere new to watch, under the stores already watched. Hidden once
+     you watch any part of a store, so the list shrinks as you use it. */
+  const watchedHosts = new Set(WATCHES.map(w => hostOf(w.url)));
+  const fresh = SUGGESTED.filter(x => !watchedHosts.has(hostOf(x.url)));
+  if (fresh.length && WATCHES.length) {
+    html += `<div class="group-label">Stores you might watch · ${fresh.length}</div>
+      <div>${fresh.map(suggRow).join('')}</div>`;
+  }
   /* Anything already listed above as actionable is not repeated here. Showing
      each event twice is precisely the clutter this section was accused of. */
   const shown = new Set(fired.map(e => e.id));
@@ -1174,6 +1198,41 @@ function render() {
   $('sheet').innerHTML = html;
   if (OPEN_BUCKET !== null && $('add').querySelector('.bucket-sheet')
       && !$('add').classList.contains('hide')) renderBucket(false);
+}
+
+/* ---------- suggestions ---------- */
+
+const hostOf = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } };
+
+function suggRow(x) {
+  const carried = (x.brands || []).map(b => `<b>${esc(b.name)}</b> ${esc(b.count)}`).join(' · ');
+  return `<div class="sugg">
+    <span class="sn"><span class="k">${esc(x.city)}</span>${esc(x.name)}</span>
+    <span class="sb">${carried ? carried + ' in stock now' : esc(x.note || '')}</span>
+    <span class="sa">
+      ${x.sale_url ? `<button class="chip mini" data-url="${esc(x.sale_url)}" data-v="${esc(JSON.stringify(x.vendors || []))}"
+        onclick="watchSuggested(this.dataset.url, JSON.parse(this.dataset.v))">Watch sale</button>` : ''}
+      <button class="chip mini" data-url="${esc(x.url)}" data-v="${esc(JSON.stringify(x.vendors || []))}"
+        onclick="watchSuggested(this.dataset.url, JSON.parse(this.dataset.v))">Watch new</button>
+    </span>
+  </div>`;
+}
+
+/* The ordinary Add sheet, filled in: the store is identified on the spot and
+   nothing is watched until you press Start watching. */
+function watchSuggested(url, vendors) {
+  openAdd();
+  pickIntent('drop');
+  $('aUrl').value = url;
+  /* Only your brands. A whole multi-brand store announces every arrival,
+     which is the noise this app exists to avoid. */
+  if (vendors && vendors.length) {
+    PENDING_FILTER = {vendors};
+    $('detect').insertAdjacentHTML('afterend', `<div class="warn" id="aVendors">Only alerts
+      for <b>${vendors.map(esc).join('</b>, <b>')}</b> — the store's own spelling. Change it
+      later with <span class="mono">/filter</span> in Telegram.</div>`);
+  }
+  detect();
 }
 
 /* ---------- actions ---------- */
@@ -1357,6 +1416,7 @@ const INTENTS = [
 
 function openAdd() {
   OPEN_BUCKET = null;
+  PENDING_FILTER = null;
   INTENT = 'restock';
   $('add').innerHTML = `<div class="sheet">
     <h2>What do you want to be told about?</h2>
@@ -1554,6 +1614,7 @@ async function saveWatch() {
   if (!url) { $('addErr').textContent = 'Paste a URL first.'; return; }
   const seg = [...$('seg').children].find(b => b.getAttribute('aria-pressed') === 'true');
   const body = {url, tier: seg ? seg.dataset.tier : 'base', alert_level: 'info'};
+  if (PENDING_FILTER && INTENT === 'drop') body.filter_json = PENDING_FILTER;
   if (INTENT === 'restock' && !$('sizeField').classList.contains('hide')) {
     body.size_pref = $('aSize').value.trim() || null;
   }
@@ -1616,6 +1677,7 @@ async function start() {
   $('warnings').innerHTML = me.telegram_configured ? '' :
     `<div class="warn">Telegram is not configured — alerts are recorded but not
      delivered. Run <span class="mono">./setup-telegram.sh</span> on the server.</div>`;
+  try { SUGGESTED = (await api('/suggestions')).stores || []; } catch (e) { SUGGESTED = []; }
   await refresh();
   clearInterval(TIMER);
   TIMER = setInterval(refresh, 10000);

@@ -153,7 +153,7 @@ def png(w=8, h=10, rgb=(150, 110, 80)) -> bytes:
 
 # Heights past which a row is wrapping pathologically. Product rows carry an
 # image and a row of size chips on a phone, so they get more room.
-ROW_LIMITS = {".wait": MAX_ROW_HEIGHT, ".fired": MAX_ROW_HEIGHT,
+ROW_LIMITS = {".wait": MAX_ROW_HEIGHT, ".fired": MAX_ROW_HEIGHT, ".sugg": 200,
               ".bucket": 170, ".feed": 160, ".row": 420}
 
 
@@ -306,7 +306,7 @@ def main() -> int:
             if phone:
                 tiny = page.evaluate("""() => {
                     const out = [];
-                    const sel = '.x, .bucket, .dock button, .item-acts a, .item-acts button, .btn-text';
+                    const sel = '.x, .bucket, .dock button, .item-acts a, .item-acts button, .btn-text, .sugg button';
                     for (const e of document.querySelectorAll(sel)) {
                         const r = e.getBoundingClientRect();
                         if (!r.width || !r.height) continue;
@@ -393,6 +393,22 @@ def main() -> int:
             no_junk("#add")
             page.keyboard.press("Escape")
 
+
+            # ---- suggested stores: listed, and one tap from a filled-in watch
+            rows = page.locator(".sugg").count()
+            if rows == 0:
+                fail("no suggested stores under the watch list")
+            else:
+                page.locator(".sugg", has_text="Neighbour").locator("text=Watch new").click()
+                page.wait_for_timeout(300)
+                url = page.input_value("#aUrl")
+                if url != "https://shopneighbour.com/collections/all":
+                    fail(f"Watch new filled in {url!r}")
+                note = page.inner_text("#aVendors") if page.locator("#aVendors").count() else ""
+                if "Comoli Mens" not in note:
+                    fail("the brand filter was not shown before saving")
+                no_junk("#add")
+                page.keyboard.press("Escape")
 
             # ---- light / dark: reachable, working, legible, remembered
             toggle = page.locator(".dock .theme" if phone else ".hdr-actions .theme")
