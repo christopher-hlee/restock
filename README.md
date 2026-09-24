@@ -49,6 +49,27 @@ laptop, and an item cleared on one has to be gone on the other. **Clear all**
 in a sheet empties that watch's bucket; anything still listed above is not
 repeated in **Recent alerts**, which holds the rest of the history.
 
+### Look: Kinari
+
+The dashboard's visual system is **Kinari**, ink on unbleached paper, designed
+in Claude Design. Its spec, tokens, glyphs and HTML reference live in
+[`design/kinari/`](design/kinari/README.md), and the spec wins over the
+reference wherever they differ.
+
+- **Grounds:** washi (light) and sumi (dark).
+- **Type:** Newsreader for names and headings, Hanken Grotesk for everything
+  else.
+- **Shape:** square corners, no shadows.
+- **Colour:** one vermilion fill that only ever means *buy*: size chips, Add
+  to cart, Cart, and the Buyable figure. A state is always a glyph and a word,
+  never colour alone.
+- **Case:** nothing is set in capitals except the header's date line.
+
+`ui-check.py` enforces the last three on the rendered page, not the
+stylesheet. It fails if the accent colours anything that isn't a buy control,
+if text outside the date line is in capitals, or if light-mode text falls
+under 4.5:1 against its own background.
+
 ### Light and dark
 
 A sun/moon button switches themes: in the bottom dock on a phone, beside

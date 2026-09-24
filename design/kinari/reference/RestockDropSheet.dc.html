@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..600&amp;family=Geist+Mono:wght@400..500&amp;family=Hanken+Grotesk:wght@400..600&amp;family=Instrument+Sans:wdth,wght@100,400..600&amp;family=Instrument+Serif&amp;family=Inter:opsz,wght@14..32,400..600&amp;family=Newsreader:opsz,wght@6..72,400..500&amp;display=swap" rel="stylesheet">
+</helmet>
+<div role="dialog" aria-label="{{ title }}" style="height:100%; box-sizing:border-box; display:flex; flex-direction:column; background:var(--sheet-bg); color:var(--text); font-family:var(--f-ui); font-size:15px; line-height:1.45; font-feature-settings:var(--ff); -webkit-font-smoothing:antialiased; text-wrap:pretty; border-top:1px solid var(--rule); border-radius:var(--radius) var(--radius) 0 0; box-shadow:var(--elev-sheet); overflow:hidden">
+  <div style="flex:none; padding:0 var(--gutter,16px); border-bottom:var(--sh-rule,0px) solid var(--border)">
+    <div style="width:36px; height:4px; border-radius:2px; background:var(--border); margin:8px auto 6px"></div>
+    <div style="display:flex; align-items:flex-start; gap:12px; padding:2px 0 14px">
+      <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+        <div style="font-size:13px; line-height:1.3; color:var(--text-dim)">{{ store }}</div>
+        <div style="font-family:var(--f-display); font-size:26px; font-weight:var(--h1-w); letter-spacing:var(--h1-track); line-height:1.1; color:var(--bright); overflow-wrap:anywhere">{{ title }}</div>
+        <div style="font-family:var(--f-data); font-size:13px; line-height:1.35; color:var(--text); font-variant-numeric:tabular-nums">{{ sub }}</div>
+      </div>
+      <button onClick="{{ close }}" aria-label="Close" style="display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; margin:-4px -14px 0 0; padding:0; background:none; border:0; color:var(--text); cursor:pointer"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5"></path></svg></button>
+    </div>
+  </div>
+
+  <div style="flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:0 var(--gutter,16px)">
+    <sc-for list="{{ items }}" as="it" hint-placeholder-count="6">
+      <div style="display:flex; gap:12px; padding:16px 0; border-top:1px solid var(--rule-faint)">
+        <div style="flex:none; width:96px; display:flex; flex-direction:column; align-items:flex-start; gap:8px">
+          <sc-if value="{{ it.photo }}" hint-placeholder-val="{{ true }}"><div style="width:96px; height:96px; background:var(--photo-bg); box-shadow:var(--photo-ring); display:flex; align-items:flex-end; padding:6px; box-sizing:border-box; font-family:var(--f-mono); font-size:10px; line-height:1; color:var(--muted)">photo</div></sc-if>
+          <sc-if value="{{ it.nophoto }}" hint-placeholder-val="{{ false }}"><div style="width:96px; height:96px; background:var(--photo-bg); box-shadow:var(--photo-ring); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:var(--muted); font-size:12px; line-height:1"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6.4 4.6a1.6 1.6 0 1 1 2.1 1.5c-.3.1-.5.4-.5.7v.8l6.3 4.2H1.7L8 7.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"></path></svg>no photo</div></sc-if>
+          <sc-if value="{{ it.tReleased }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex; font-size:12px; font-weight:600; line-height:16px; padding:2px 6px; border:1px solid currentColor; border-radius:var(--radius-tag); color:var(--bright); white-space:nowrap">released</span></sc-if>
+          <sc-if value="{{ it.tBack }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex; font-size:12px; font-weight:600; line-height:16px; padding:2px 6px; border:1px solid currentColor; border-radius:var(--radius-tag); color:var(--in-stock); white-space:nowrap">back in stock</span></sc-if>
+          <sc-if value="{{ it.tRelisted }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex; font-size:12px; font-weight:600; line-height:16px; padding:2px 6px; border:1px dotted currentColor; border-radius:var(--radius-tag); color:var(--muted); white-space:nowrap">relisted</span></sc-if>
+          <sc-if value="{{ it.tSoon }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex; font-size:12px; font-weight:600; line-height:16px; padding:2px 6px; border:1px solid currentColor; border-radius:var(--radius-tag); color:var(--no-baseline); white-space:nowrap">coming soon</span></sc-if>
+          <sc-if value="{{ it.tUnverified }}" hint-placeholder-val="{{ false }}"><span title="The store gave no listing date, so this may not be new" style="display:inline-flex; font-size:12px; font-weight:600; line-height:16px; padding:2px 6px; border:1px solid currentColor; border-radius:var(--radius-tag); color:var(--muted); white-space:nowrap">unverified?</span></sc-if>
+        </div>
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+          <div style="display:flex; align-items:flex-start; gap:6px">
+            <sc-if value="{{ it.star }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 12 12" width="12" height="12" aria-label="Worth pricing" style="flex:none; margin-top:4px; color:var(--bright)"><path d="M6 .9 7.5 4.1l3.5.4-2.6 2.4.7 3.5L6 8.7l-3.1 1.7.7-3.5L1 4.5l3.5-.4z" fill="currentColor"></path></svg></sc-if>
+            <div title="{{ it.t }}" style="min-width:0; font-family:var(--f-name); font-size:var(--name-size); font-weight:var(--name-w); line-height:20px; color:var(--bright); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">{{ it.t }}</div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; align-items:baseline; column-gap:8px">
+            <span style="white-space:nowrap; font-family:var(--f-data); font-size:15px; font-weight:500; color:var(--bright); font-variant-numeric:tabular-nums">{{ it.price }}</span>
+            <sc-if value="{{ it.hasLanded }}" hint-placeholder-val="{{ true }}"><span style="white-space:nowrap; font-family:var(--f-data); font-size:13px; color:var(--text-dim); font-variant-numeric:tabular-nums">{{ it.landed }}</span></sc-if>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; column-gap:6px; font-family:var(--f-data); font-size:13px; line-height:1.35; color:var(--muted); font-variant-numeric:tabular-nums">
+            <span>{{ it.ago }}</span>
+            <sc-if value="{{ it.fast }}" hint-placeholder-val="{{ true }}"><span>{{ it.lagLabel }}</span></sc-if>
+            <sc-if value="{{ it.slow }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex; align-items:center; gap:5px; color:var(--armed)">·<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M1.5 2h2v8h-2zM5 4h2v6H5zM8.5 6h2v4h-2z" fill="currentColor"></path></svg>{{ it.lag }}</span></sc-if>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:8px">
+            <sc-if value="{{ it.buyable }}" hint-placeholder-val="{{ true }}"><button onClick="{{ it.cart }}" style="display:inline-flex; align-items:center; justify-content:center; min-width:64px; min-height:44px; padding:0 16px; margin:0; box-sizing:border-box; border:0; border-radius:var(--radius); background:var(--accent); color:var(--accent-ink); font-family:var(--f-buy); font-size:var(--buy-size); font-weight:var(--buy-w); line-height:1; cursor:pointer" style-active="filter:brightness(.88); transform:translateY(1px)">Cart</button></sc-if>
+            <button onClick="{{ it.open }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 16px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Open</button>
+            <button onClick="{{ it.x }}" aria-label="Dismiss this item" style="display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; margin:0 -14px 0 auto; padding:0; background:none; border:0; color:var(--muted); cursor:pointer"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5"></path></svg></button>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="flex:none; display:flex; align-items:center; gap:16px; padding:12px var(--gutter,16px) calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--rule); background:var(--sheet-bg)">
+    <button onClick="{{ openStore }}" style="flex:1; display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 16px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Open the store</button>
+    <button onClick="{{ clearAll }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:0 -8px 0 0; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; white-space:nowrap; cursor:pointer">{{ clearLabel }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:393,&quot;height&quot;:784},&quot;drop&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;comoli&quot;,&quot;satisfy&quot;,&quot;yohji&quot;],&quot;default&quot;:&quot;comoli&quot;,&quot;tsType&quot;:&quot;'comoli' | 'satisfy' | 'yohji'&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onCart&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(title: string) =&gt; void&quot;},&quot;onClearAll&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(n: number) =&gt; void&quot;},&quot;onToast&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(msg: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { gone: [] };
+  renderVals() {
+    const p = this.props, s = this.state;
+    const DATA = {
+      comoli: {store: 'ragtag-global.com', title: 'comoli', when: 'newest 7s ago', items: [
+        ['Comoli Wool Silk Jacket', '¥58,160', '≈$403 landed', '7s ago', '3m behind', 'released', 1],
+        ['Comoli Cashmere Crewneck Knit', '¥71,500', '≈$496 landed', '7s ago', '3m behind', 'released', 1],
+        ['Comoli Tin Cloth Work Pants', '¥39,600', '≈$274 landed', '2m ago', '11m behind', 'back', 0, {slow: 1}],
+        ['Comoli Deck Jacket', '¥88,000', '≈$610 landed', '2m ago', '2m behind', 'soon', 0, {notbuy: 1}],
+        ['Comoli Wool Flannel Drawstring Pants', '¥42,900', '≈$297 landed', '6m ago', '3m behind', 'released', 1],
+        ['Comoli Bandcollar Shirt', '¥33,000', '≈$229 landed', '9m ago', '4m behind', 'relisted', 0],
+        ['Comoli Linen Work Jacket', '¥46,200', '≈$320 landed', '14m ago', '', 'unverified', 0],
+        ['Comoli Silk Nep Short Sleeve Tee', '¥19,800', '≈$137 landed', '18m ago', '3m behind', 'released', 0],
+        ['Comoli Moleskin Coverall', '¥64,900', '≈$450 landed', '21m ago', '2m behind', 'back', 0],
+        ['Comoli Chambray Work Shirt', '¥27,500', '≈$191 landed', '26m ago', '3m behind', 'released', 0],
+        ['Comoli Wool Knit Cap', '¥8,800', '≈$61 landed', '31m ago', '3m behind', '', 0],
+        ['Comoli Suede Belt', '¥13,200', '≈$91 landed', '38m ago', '3m behind', 'released', 0, {nophoto: 1}],
+      ]},
+      satisfy: {store: 'satisfyrunning.com', title: 'all', when: 'newest 4m ago', items: [
+        ['MothTech Muscle Tee', '$165', '', '4m ago', '1m behind', 'released', 0],
+        ['Rippy Trail Shorts 5″', '$185', '', '4m ago', '1m behind', 'back', 0],
+      ]},
+      yohji: {store: 'ragtag-global.com', title: 'yohjiyamamotopourhomme', when: '9m ago', items: [
+        ['Yohji Yamamoto Pour Homme Wool Gabardine Wide Pants', '¥52,800', '≈$366 landed', '9m ago', '6m behind', 'released', 1, {slow: 1}],
+      ]},
+    };
+    const key = DATA[p.drop] ? p.drop : 'comoli';
+    const d = DATA[key];
+    const list = d.items.map((r, i) => ({i, t: r[0], price: r[1], landed: r[2], ago: r[3], lag: r[4], tag: r[5], star: !!r[6], x: r[7] || {}}))
+      .filter(r => !s.gone.includes(r.i));
+    const n = list.length;
+    const buyable = list.filter(r => !r.x.notbuy).length;
+    const noun = n === 1 ? 'item' : 'items';
+    const sub = n === 0 ? 'Nothing left in this drop'
+      : (buyable === n ? n + ' buyable ' + noun : n + ' ' + noun + ' · ' + buyable + ' buyable') + ' · ' + d.when;
+    const toast = m => p.onToast && p.onToast(m);
+    return {
+      store: d.store, title: d.title, sub, count: n, clearLabel: 'Clear all ' + n,
+      close: () => p.onClose && p.onClose(),
+      openStore: () => toast('Opens ' + d.store + ' in a new tab'),
+      clearAll: () => { if (p.onClearAll) p.onClearAll(n); else this.setState({gone: d.items.map((_, i) => i)}); },
+      items: list.map(r => ({
+        t: r.t, price: r.price, landed: r.landed, hasLanded: !!r.landed, ago: r.ago, lag: r.lag, lagLabel: '· ' + r.lag,
+        fast: !!r.lag && !r.x.slow, slow: !!r.lag && !!r.x.slow, star: r.star,
+        photo: !r.x.nophoto, nophoto: !!r.x.nophoto, buyable: !r.x.notbuy,
+        tReleased: r.tag === 'released', tBack: r.tag === 'back', tRelisted: r.tag === 'relisted', tSoon: r.tag === 'soon', tUnverified: r.tag === 'unverified',
+        cart: () => p.onCart && p.onCart(r.t),
+        open: () => toast('Opens the product page on ' + d.store),
+        x: () => this.setState(st => ({gone: st.gone.concat(r.i)})),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

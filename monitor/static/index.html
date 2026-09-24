@@ -3,480 +3,544 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#100f0d" id="themeColor">
+<meta name="theme-color" content="#171513" id="themeColor">
+<!-- Stops Android WebView (Telegram's in-app browser) darkening the page by
+     algorithm: both modes are designed, so neither may be re-coloured. -->
+<meta name="color-scheme" content="light dark">
 <script>
 /* Before anything paints, so a light choice never flashes dark first. The
    choice is per device, a convenience, and the page is fine without it. */
 try {
   if (localStorage.getItem('restock-theme') === 'light') {
     document.documentElement.dataset.theme = 'light';
-    document.querySelector('#themeColor').content = '#f6f2ea';
+    document.querySelector('#themeColor').content = '#F4EFE6';
   }
 } catch (e) {}
 </script>
 <title>Restock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* Kinari: ink on unbleached paper. The spec is design/kinari/README.md; the
+   tokens below are design/kinari/kinari-tokens.css, pasted as it asks. */
+
+/* sumi — dark (default) */
 :root{
-  --ground:#100f0d; --surface:#141310; --surface-quiet:#131210; --surface-held:#131512;
-  --rule:#26221d; --border:#221f1a; --rule-faint:#1c1915;
-  --text:#d9d2c7; --bright:#f0e9dd; --text-dim:#a49c90;
-  --muted:#6b6459; --dim:#544e45; --faint:#3d3831;
-  --accent:#c2703f; --accent-hover:#d1804d; --accent-ink:#100f0d;
-  --in-stock:#7fd1a4; --failing:#e0716b; --armed:#e0a458;
-  --no-baseline:#7aa8d6; --held:#8a8177;
-  --serif:'Fraunces',Georgia,serif;
-  --sans:'Work Sans',system-ui,-apple-system,sans-serif;
-  --mono:ui-monospace,Menlo,Consolas,monospace;
-  --hatch-a:#191713; --hatch-b:#151310; --broken-a:#231715; --broken-b:#1b1412;
-  --wash-ok:rgba(127,209,164,.06); --wash-bad:rgba(224,113,107,.07);
-  --scrim:rgba(11,10,9,.93); --pressed:#151310; --chip-hover:#181410;
-  --warn-bg:#17140f; --warn-ink:#c9bfae; --field-edge:#2f2b25;
-  --ok-edge:#2f3b34; --bad-edge:#5c3230; --held-edge:#2b3630; --held-name:#c9c1b5;
-  --toast-bad:#f3d9d7; --toast-good:#d6f0e2;
+  --ground:#171513; --surface:#211E1B; --surface-quiet:#1C1A17;
+  --rule:#3A342D; --border:#7A7063; --rule-faint:#2A2622;
+  --bright:#F2EBDF; --text:#DDD5C8; --text-dim:#ADA497; --muted:#948B7E;
+  --accent:#E2553B; --accent-ink:#170A06;
+  --in-stock:#8FC27A; --failing:#E88AAE; --armed:#D9A441; --no-baseline:#7FB0D6;
+  --photo-bg:#26221E; --photo-blend:normal; --photo-edge:#2A2622;
+  --focus:#7FB0D6; --scrim:rgb(0 0 0 / .6);
+  --tint-in-stock:#1C2219; --tint-failing:#251A1F;
   color-scheme:dark;
 }
-/* Light: warm paper rather than white, and the same single accent. Every
-   text token clears 4.5:1 on the ground except --faint (3.3:1), which only
-   carries the least important words, as in the dark palette. */
+
+/* washi — light */
 :root[data-theme="light"]{
-  --ground:#f6f2ea; --surface:#fffdf8; --surface-quiet:#efe9df; --surface-held:#eef3ee;
-  --rule:#d6ccbd; --border:#e0d8ca; --rule-faint:#e9e2d6;
-  --text:#2b2620; --bright:#15120e; --text-dim:#4f473d;
-  --muted:#6f665a; --dim:#776d5e; --faint:#8f8574;
-  --accent:#a4522a; --accent-hover:#8f4622; --accent-ink:#fffaf3;
-  --in-stock:#1d7349; --failing:#b3372f; --armed:#98590c;
-  --no-baseline:#2d64a0; --held:#6b6256;
-  --hatch-a:#ebe4d8; --hatch-b:#f1ebe1; --broken-a:#f5dfdb; --broken-b:#f9ebe8;
-  --wash-ok:rgba(29,115,73,.07); --wash-bad:rgba(179,55,47,.07);
-  --scrim:rgba(40,34,27,.45); --pressed:#ece5d9; --chip-hover:#efe7dc;
-  --warn-bg:#f8eedc; --warn-ink:#4f473d; --field-edge:#d6ccbd;
-  --ok-edge:#b9d3c3; --bad-edge:#e2b3ad; --held-edge:#c9d6cc; --held-name:#3a342c;
-  --toast-bad:#7a2520; --toast-good:#155a38;
+  --ground:#F4EFE6; --surface:#EAE3D6; --surface-quiet:#EFE9DE;
+  --rule:#D8CFBF; --border:#8C8173; --rule-faint:#E4DCCD;
+  --bright:#1C1A17; --text:#2E2A25; --text-dim:#5E564C; --muted:#6F665A;
+  --accent:#B8321E; --accent-ink:#FFFFFF;
+  --in-stock:#3E6B2E; --failing:#9B2D5A; --armed:#8A5A00; --no-baseline:#1F5E86;
+  --photo-bg:#E6DED0; --photo-blend:multiply; --photo-edge:transparent;
+  --focus:#1F5E86; --scrim:rgb(28 26 23 / .45);
+  --tint-in-stock:#E9EDDF; --tint-failing:#F3E3E8;
   color-scheme:light;
 }
-*,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans);
-  text-wrap:pretty;-webkit-font-smoothing:antialiased}
-button{font:inherit;cursor:pointer}
-a{color:var(--accent)} a:hover{color:var(--accent-hover)}
 
-/* No border radius and no shadows anywhere: square corners are the identity,
-   depth comes from surface value shifts and 1px rules only. */
-.eyebrow{font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
-.kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--held)}
-.state-eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:10px;
-  font-weight:600;letter-spacing:.2em;text-transform:uppercase}
-.mono{font-family:var(--mono)}
-
-.hdr{padding:34px 44px 24px;display:flex;align-items:flex-end;
-  justify-content:space-between;gap:24px 40px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.hdr-title{display:flex;flex-direction:column;gap:8px;min-width:0}
-.hdr h1{font-family:var(--serif);font-size:32px;line-height:1;color:var(--bright);
-  font-weight:400;margin:0}
-.hdr-side{display:flex;align-items:flex-end;gap:36px;flex-wrap:wrap}
-.hdr-actions{display:flex;gap:10px}
-/* Counts as figures, not a sentence. A run of uppercase words wrapped at
-   whatever width the phone happened to be, so "18 JUST DROPPED" split across
-   lines and the numbers stopped lining up with anything. */
-.counts{display:flex;gap:28px}
-.stat{display:flex;flex-direction:column;gap:6px;min-width:0}
-.stat b{font-family:var(--serif);font-size:24px;line-height:1;font-weight:400;color:var(--text-dim)}
-.stat span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat.ok b{color:var(--in-stock)}
-.stat.bad b{color:var(--failing)}
-.stat.zero b{color:var(--faint)}
-.dock{display:none}
-/* Light/dark switch: a square icon button beside the other actions. */
-.btn-ghost.theme{width:44px;min-height:44px;padding:0;display:inline-flex;
-  align-items:center;justify-content:center;flex:none}
-.theme svg{display:block}
-
-.btn-ghost{background:none;border:1px solid var(--rule);color:var(--text);font-size:11px;
-  letter-spacing:.14em;text-transform:uppercase;padding:12px 18px;transition:border-color .1s,color .1s}
-.btn-ghost:hover{border-color:var(--accent);color:var(--bright)}
-.btn-accent{background:var(--accent);border:none;color:var(--accent-ink);font-weight:600;
-  font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:14px 22px;transition:background .1s}
-.btn-accent:hover{background:var(--accent-hover)}
-.btn-accent:disabled{opacity:.5;cursor:not-allowed}
-.btn-text{background:none;border:none;padding:0;font-size:11px;letter-spacing:.14em;
-  text-transform:uppercase;transition:color .1s}
-.btn-text:hover{color:var(--bright)}
-a.btn-text{display:inline-flex;align-items:center;text-decoration:none}
-.item-main .k .tag{margin-left:0}
-
-.body{padding:0 44px 40px;display:flex;flex-direction:column}
-.row{display:grid;grid-template-columns:104px 1fr 300px;gap:28px;align-items:center;
-  padding:24px 0;border-bottom:1px solid var(--border)}
-.row.act{background:linear-gradient(90deg,var(--wash-ok),transparent 42%)}
-.row.broken{background:linear-gradient(90deg,var(--wash-bad),transparent 42%)}
-.shot{height:124px;background:repeating-linear-gradient(135deg,var(--hatch-a) 0 8px,var(--hatch-b) 8px 16px);
-  display:flex;align-items:flex-end;padding:7px;background-size:cover;background-position:center}
-.shot span{font-family:var(--mono);font-size:9px;color:var(--dim)}
-.shot.sm{height:96px}
-.name{font-family:var(--serif);font-size:30px;line-height:1;color:var(--bright);font-weight:400}
-.name.sm{font-size:24px}
-.meta{font-size:12px;color:var(--held);overflow-wrap:anywhere}
-/* A grid or flex child defaults to the width of its longest unbreakable
-   string, and a failing watch's error is a URL with no break in it: the row
-   pushed 124px past a phone's edge. */
-.row > *{min-width:0}
-.meta b{color:var(--bright);font-weight:400}
-
-.chips{display:flex;gap:8px}
-.chip{flex:1;background:none;border:1px solid var(--dim);padding:15px 0;
-  font-family:var(--serif);font-size:17px;color:var(--bright);min-height:48px;
-  transition:border-color .1s,background .1s}
-.chip:hover{border-color:var(--accent);background:var(--chip-hover)}
-.chip.primary{flex:1.5;background:var(--accent);border:none;font-size:19px;color:var(--accent-ink)}
-.chip.primary:hover{background:var(--accent-hover)}
-.caption{font-size:11px;color:var(--dim);text-align:right}
-.actions{display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap}
-
-.group-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);
-  padding:26px 0 14px}
-.wait{display:grid;grid-template-columns:1fr 130px 92px 96px auto;gap:16px;align-items:center;
-  padding:12px 0;border-top:1px solid var(--rule-faint)}
-.wait:last-child{border-bottom:1px solid var(--rule-faint)}
-.wait .n{font-size:14px;color:var(--text-dim)}
-.wait .n .k{color:var(--dim);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-  padding-right:10px}
-.wait .s{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
-.wait .p{font-family:var(--serif);font-size:15px;color:var(--muted)}
-.wait .t{font-size:12px;color:var(--faint);text-align:right}
-.wait .wa{display:inline-flex;align-items:center;gap:10px;justify-self:end}
-
-@keyframes armpulse{0%,100%{opacity:1}50%{opacity:.3}}
-.pulse{animation:armpulse 1.6s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
-
-/* A fired drop is one compact row per item, each dismissable on its own.
-   Cards were tried first and did not survive contact with reality: a store
-   lists one product at a time, so every card held a single row and twenty
-   drops filled the screen. */
-.fired{display:grid;grid-template-columns:1fr 84px 74px 92px 34px;gap:14px;
-  align-items:center;padding:12px 0;border-top:1px solid var(--rule-faint)}
-.fired:last-child{border-bottom:1px solid var(--rule-faint)}
-.fired .fi{font-family:var(--serif);font-size:16px;color:var(--bright);line-height:1.3;
-  min-width:0;overflow-wrap:anywhere}
-.fired .fi a{color:var(--bright);text-decoration:none}
-.fired .fi a:hover{color:var(--accent)}
-.fired .fi .k{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--dim);margin-bottom:3px}
-.tag{margin-left:9px;padding:1px 6px;border:1px solid var(--dim);color:var(--held);
-  letter-spacing:.14em;white-space:nowrap}
-.tag.now{border-color:var(--accent);color:var(--accent)}
-.tag.soon{border-color:var(--no-baseline);color:var(--no-baseline)}
-.star{color:var(--accent);letter-spacing:0}
-.fired .fp{font-family:var(--serif);font-size:15px;color:var(--muted)}
-.fired .ft{font-size:11px;color:var(--faint)}
-/* Detection lag. Amber past five minutes, because that is the point at which
-   the monitor stopped being the thing that told you first. */
-.fired .lag{display:block;margin-top:2px;color:var(--held)}
-.fired .lag.slow{color:var(--armed)}
-.chip.mini{flex:none;width:100%;padding:8px 0;font-family:var(--sans);font-size:11px;
-  letter-spacing:.14em;text-transform:uppercase;min-height:34px}
-/* The dismiss control. Dim until hovered so twenty of them do not read as
-   twenty warnings, but always present rather than hidden behind a hover. */
-.x{background:none;border:1px solid transparent;color:var(--dim);font-size:19px;
-  line-height:1;width:34px;height:34px;transition:color .1s,border-color .1s}
-.x:hover{color:var(--failing);border-color:var(--failing)}
-/* ---------- drops, one bucket per watch ----------
-   Twenty rows from one store read as twenty separate events when they are one
-   fact: that store has things you can buy. The list says that once per watch
-   and the sheet behind it holds the items. */
-.bucket{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:22px;align-items:center;
-  width:100%;margin:0;padding:14px 0;background:none;border:0;
-  border-top:1px solid var(--rule-faint);color:inherit;text-align:left;transition:background .1s}
-.bucket:last-child{border-bottom:1px solid var(--rule-faint)}
-.bucket:hover{background:var(--surface-quiet)}
-.bucket:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
-.bk-main{display:flex;flex-direction:column;gap:5px;min-width:0}
-.bk-main .k,.item-main .k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--dim);overflow-wrap:anywhere}
-.bk-name{font-family:var(--serif);font-size:21px;line-height:1.15;color:var(--bright);
-  overflow-wrap:anywhere}
-.bk-meta{font-size:12px;color:var(--held)}
-.bk-meta b{color:var(--in-stock);font-weight:500}
-.bk-go{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
-  white-space:nowrap}
-.bk-go i{font-style:normal;font-size:18px;letter-spacing:0;padding-left:6px}
-.bucket:hover .bk-go{color:var(--accent)}
-
-/* A product photo, or the hatch every empty image slot already uses. */
-.tn{display:block;position:relative;overflow:hidden;flex:none;
-  background:repeating-linear-gradient(135deg,var(--hatch-a) 0 6px,var(--hatch-b) 6px 12px)}
-.tn img{display:block;width:100%;height:100%;object-fit:cover}
-/* Up to three photos fanned like a hand of cards: the newest on top, the
-   others showing an edge. Enough to recognise a drop without opening it. */
-.deck{position:relative;width:92px;height:64px}
-.deck .tn{position:absolute;top:0;width:64px;height:64px;outline:1px solid var(--ground)}
-.deck .tn:nth-child(1){left:0;z-index:3}
-.deck .tn:nth-child(2){left:14px;z-index:2;filter:brightness(.7)}
-.deck .tn:nth-child(3){left:28px;z-index:1;filter:brightness(.5)}
-
-.sheet.bucket-sheet{max-width:820px;max-height:calc(100vh - 80px);overflow-y:auto;
-  overscroll-behavior:contain;padding-top:0}
-.sheet-head{position:sticky;top:0;z-index:2;background:var(--ground);display:flex;
-  align-items:flex-start;justify-content:space-between;gap:16px;padding:28px 0 16px;
-  border-bottom:1px solid var(--border)}
-.sheet-head h2{overflow-wrap:anywhere;margin:4px 0 6px}
-.sheet-head .sub{margin:0}
-.sheet-head .x{width:44px;height:44px;flex:none}
-.bucket-sheet .sheet-actions{position:sticky;bottom:0;z-index:2;background:var(--ground);
-  margin-top:0;padding:18px 0 22px}
-.items{display:flex;flex-direction:column}
-.item{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:18px;align-items:center;
-  padding:16px 0;border-top:1px solid var(--rule-faint)}
-.item:first-child{border-top:0}
-.item .tn{width:76px;height:76px}
-.item-main{display:flex;flex-direction:column;gap:5px;min-width:0}
-.item-title{font-family:var(--serif);font-size:17px;line-height:1.3;color:var(--bright);
-  text-decoration:none;overflow-wrap:anywhere}
-a.item-title:hover{color:var(--accent)}
-.item-meta{font-size:12px;color:var(--muted);line-height:1.5}
-.item-meta .price{font-family:var(--serif);font-size:15px;color:var(--text)}
-.item-meta .lag{color:var(--held)}
-.item-meta .lag.slow{color:var(--armed)}
-.item-acts{display:flex;gap:8px;align-items:center}
-.item-acts .chip{flex:none;display:inline-flex;align-items:center;justify-content:center;
-  width:auto;min-width:76px;padding:0 16px;min-height:44px;text-decoration:none}
-.item-acts .x{width:44px;height:44px}
-
-/* Stores worth adding. Checked, not guessed: each one's catalogue answered
-   this app, and the brands listed are counted from what it actually stocks. */
-.sugg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 18px;align-items:center;
-  padding:14px 0;border-top:1px solid var(--rule-faint)}
-.sugg:last-child{border-bottom:1px solid var(--rule-faint)}
-.sugg .sn{font-family:var(--serif);font-size:18px;color:var(--bright);overflow-wrap:anywhere}
-.sugg .sn .k{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--dim);margin-bottom:3px}
-.sugg .sb{font-size:12px;color:var(--held);grid-column:1}
-.sugg .sb b{color:var(--text-dim);font-weight:500}
-.sugg .sa{display:flex;gap:8px;grid-row:1/span 2;grid-column:2}
-.sugg .sa .chip{flex:none;width:auto;padding:0 14px;min-height:40px}
-
-.feed{display:grid;grid-template-columns:96px 150px 1fr 26px;gap:18px;align-items:baseline;
-  padding:11px 0;border-top:1px solid var(--rule-faint)}
-.feed .fw{font-size:12px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap}
-.feed .fs{font-size:12px;color:var(--muted)}
-.feed a{text-decoration:none}
-
-.empty{color:var(--dim);font-size:13px;padding:40px 0;border-top:1px solid var(--border)}
-.warn{background:var(--warn-bg);border-left:2px solid var(--armed);padding:12px 14px;
-  font-size:12px;color:var(--warn-ink);margin:16px 0}
-.warn b{color:var(--bright);font-weight:600}
-
-.overlay{position:fixed;inset:0;background:var(--scrim);z-index:100;
-  display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
-.sheet{background:var(--ground);border:1px solid var(--rule);width:100%;max-width:780px;
-  padding:34px 40px 32px}
-.sheet h2{font-family:var(--serif);font-size:30px;font-weight:400;color:var(--bright);margin:0 0 6px}
-.sheet .sub{font-size:14px;color:var(--held);max-width:600px;margin:0 0 20px;word-break:break-word}
-.intent{display:grid;grid-template-columns:22px 1fr 240px;gap:16px;align-items:center;
-  padding:20px 0;border:0;border-top:1px solid var(--border);background:none;
-  width:100%;text-align:left;color:inherit}
-.intent:hover{background:var(--surface-quiet)}
-.intent[aria-pressed="true"]{background:var(--pressed);border-left:2px solid var(--accent);
-  padding:20px 16px 20px 14px}
-.intent .q{font-family:var(--serif);font-size:20px;color:var(--bright)}
-.intent .ex{font-size:12px;color:var(--muted)}
-.field{display:flex;flex-direction:column;gap:8px;margin-top:22px}
-.field label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
-  display:flex;justify-content:space-between;gap:12px}
-.field input{background:var(--surface);border:1px solid var(--field-edge);color:var(--text);
-  font-family:var(--mono);font-size:14px;padding:13px 14px;width:100%}
-.field input:focus{outline:none;border-color:var(--accent)}
-.detect{background:var(--surface-held);border:1px solid var(--ok-edge);padding:14px 16px;
-  font-size:13px;color:var(--bright);margin-top:14px}
-.detect .l2{font-size:12px;color:var(--held);margin-top:5px}
-.detect.bad{border-color:var(--bad-edge);color:var(--failing)}
-.seg{display:flex;border:1px solid var(--field-edge)}
-.seg button{flex:1;background:none;border:none;color:var(--muted);font-size:11px;
-  letter-spacing:.14em;text-transform:uppercase;padding:13px 0}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
-.sheet-actions{display:flex;gap:18px;align-items:center;margin-top:28px;padding-top:24px;
-  border-top:1px solid var(--border);flex-wrap:wrap}
-.hide{display:none!important}
-
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;
-  background:var(--surface);border:1px solid var(--dim);padding:13px 20px;font-size:13px;max-width:90vw}
-.toast.bad{border-color:var(--failing);color:var(--toast-bad)}
-.toast.good{border-color:var(--in-stock);color:var(--toast-good)}
-
-@media (max-width:1100px){
-  .row{grid-template-columns:80px 1fr 240px;gap:20px}
-  .name{font-size:26px}
+/* Mode-independent */
+:root{
+  --serif:"Newsreader","Iowan Old Style","Hiragino Mincho ProN","Yu Mincho","Noto Serif",Georgia,serif;
+  --sans:"Hanken Grotesk",-apple-system,"Hiragino Sans","Yu Gothic",Roboto,"Noto Sans JP",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,"Roboto Mono",monospace;
+  --gutter:16px; --bleed:16px;
+  --held:var(--text-dim);
 }
+@media (min-width:600px){:root{--gutter:32px}}
+@media (min-width:1200px){:root{--gutter:48px}}
+
+/* ---------- base ----------
+   Square, flat and still: radius 0, no depth, no transitions on controls.
+   Hover only ever mirrors a pressed state, and only where hover exists, so a
+   phone and a streamed isolation browser see the same page. */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--text);font:400 15px/1.45 var(--sans);
+  text-wrap:pretty;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border-radius:0}
+h1,h2{font-weight:400}
+a{color:var(--bright);text-decoration-thickness:1px;text-underline-offset:3px}
+@media (hover:hover){a:hover{color:var(--text)}}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.hide{display:none!important}
+body.locked{overflow:hidden}
+
+/* State glyphs and icons: 12px shapes that differ by outline alone, so no
+   state ever depends on colour. */
+.glyph,.icon{display:block;flex:none}
+@keyframes tick{50%{opacity:0}}
+.glyph.armed .tick{animation:tick 2.4s steps(1) infinite}
+@media (prefers-reduced-motion:reduce){
+  .glyph.armed .tick{animation:none}
+  .glyph.armed path{fill:currentColor}
+}
+.state-eyebrow{display:inline-flex;align-items:center;gap:6px;font:500 13px/1.35 var(--sans)}
+.when{font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums lining-nums}
+.states{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.star{color:var(--bright)}
+.kicker{font-size:13px;line-height:1.35;color:var(--text-dim)}
+.caption{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:1.35;color:var(--text-dim)}
+
+/* ---------- buttons: buy, quiet, text ----------
+   One fill means buy. --accent is only ever the background of a size chip,
+   Add to cart, Cart and the Buyable figure — never a link, a tag, a selected
+   control or a primary action that is not a purchase. */
+.btn-buy{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--accent);color:var(--accent-ink);border:0;border-radius:0;
+  font:600 15px/1 var(--sans);font-variant-numeric:tabular-nums lining-nums;
+  text-decoration:none;white-space:nowrap}
+.btn-buy:active{filter:brightness(.88);transform:translateY(1px)}
+.btn-buy:disabled{opacity:.45}
+@media (hover:hover){.btn-buy:hover{filter:brightness(.88);color:var(--accent-ink)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips .btn-buy{flex:none;min-width:56px;min-height:48px;padding:0 16px}
+.btn-buy.addcart{min-height:48px;padding:0 20px}
+.btn-quiet,.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:0 16px;background:transparent;border:1px solid var(--border);
+  border-radius:0;color:var(--bright);font:500 15px/1 var(--sans);white-space:nowrap;
+  text-decoration:none}
+.btn-quiet:active,.btn-ghost:active{background:var(--surface)}
+@media (hover:hover){.btn-quiet:hover,.btn-ghost:hover{background:var(--surface);color:var(--bright)}}
+.btn-quiet:disabled,.btn-ghost:disabled{opacity:.45}
+.btn-quiet.strong,.btn-ghost.strong{border-color:var(--bright);font-weight:600;min-height:48px}
+/* .btn-accent carries no style any more. It survives on the dock's Add a
+   watch only because ui-check opens the Add sheet on phones through
+   `.dock .btn-accent`. */
+.theme{width:44px;min-height:44px;padding:0!important;flex:none}
+.theme svg{display:block}
+.btn-text{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:0 8px;margin-inline:-8px;background:none;border:0;color:var(--text);
+  font:500 14px/1 var(--sans);text-decoration:underline;text-decoration-thickness:1px;
+  text-underline-offset:3px;white-space:nowrap}
+.btn-text:active{color:var(--bright)}
+@media (hover:hover){.btn-text:hover{color:var(--bright)}}
+.btn-text.danger{color:var(--failing)}
+.x{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;
+  flex:none;padding:0;background:none;border:0;color:var(--muted)}
+.x:active{color:var(--bright)}
+/* At a right edge the icon sits on the box's right side, lining up with the
+   text edge, instead of the box being pulled past its row. */
+.x.edge{justify-content:flex-end}
+@media (hover:hover){.x:hover{color:var(--bright)}}
+
+/* ---------- tags ---------- */
+.tag{display:inline-flex;align-items:center;font:600 12px/16px var(--sans);padding:2px 6px;
+  border:1px solid currentColor;white-space:nowrap;margin-left:0;color:var(--muted)}
+.tag.now{color:var(--bright)}
+.tag.now.back{color:var(--in-stock)}
+.tag.relisted{color:var(--muted);border-style:dotted}
+.tag.soon{color:var(--no-baseline)}
+.tag.unverified{color:var(--muted)}
+
+/* ---------- photos ----------
+   A square well. In light mode the product's white background melts into the
+   paper (multiply); in dark mode a hairline edge keeps the well visible. */
+.tn,.shot{position:relative;display:flex;align-items:center;justify-content:center;flex:none;
+  aspect-ratio:1;background:var(--photo-bg);overflow:hidden;
+  outline:1px solid var(--photo-edge);outline-offset:-1px}
+.tn img,.shot img{display:block;width:100%;height:100%;object-fit:cover;
+  mix-blend-mode:var(--photo-blend)}
+.nophoto{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);
+  font-size:12px;line-height:1;white-space:nowrap}
+.shot{width:96px;height:96px}
+.shot.sm{width:72px;height:72px}
+.row.broken .shot img{filter:grayscale(1)}
+
+/* ---------- header ---------- */
+.hdr{max-width:calc(1120px + 2*var(--gutter));margin:0 auto;padding:24px var(--gutter) 0;
+  display:flex;flex-direction:column;gap:10px}
+.hdr-row1{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:20px}
+.hdr .eyebrow{font:500 12px/1.3 var(--sans);text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-dim)}
+.hdr-row2{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 48px}
+#headline{flex:1 1 300px;min-width:0;margin:0;font:400 28px/1.1 var(--serif);
+  font-optical-sizing:auto;letter-spacing:-.01em;color:var(--bright);text-wrap:balance}
+#headline.quiet{color:var(--text-dim)}
+.hdr-actions{display:none;gap:8px}
+/* Counts as figures in cells. Only a non-zero Buyable fills: it is the one
+   number that means "go and buy something". */
+.counts{flex:1 1 330px;min-width:0;display:flex}
+.stat{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:5px;padding:10px 6px 9px}
+.stat + .stat{border-left:1px solid var(--rule)}
+.stat b{display:flex;align-items:center;gap:6px;font:500 24px/1 var(--sans);color:var(--bright);
+  font-variant-numeric:tabular-nums lining-nums}
+.stat span{font-size:13px;line-height:1.2;color:var(--text-dim);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.stat.buy{background:var(--accent)}
+.stat.buy b,.stat.buy span{color:var(--accent-ink)}
+.stat.bad .glyph{color:var(--failing)}
+.stat.zero b{color:var(--muted)}
+
+/* ---------- page body and columns ---------- */
+.body{max-width:calc(1120px + 2*var(--gutter));margin:0 auto;padding:0 var(--gutter) 48px}
+#warnings .warn{margin-top:16px}
+.cols{display:flex;flex-wrap:wrap;align-items:flex-start;column-gap:48px}
+.col-main{flex:1 1 560px;min-width:0;max-width:720px}
+.col-side{flex:1 1 300px;min-width:0;max-width:352px}
+/* Sticky only while it fits: a taller side column pinned to the top would
+   trap Recent alerts below the fold for good. */
+.col-side.stick{position:sticky;top:0}
+.one-col{max-width:720px}
+#build{padding:40px 0 24px;font:12px/1 var(--mono);color:var(--muted)}
+
+/* ---------- section header ---------- */
+.group-label{display:flex;align-items:center;gap:8px;margin-top:32px;padding-top:12px;
+  border-top:1px solid var(--rule);min-height:32px;color:var(--text-dim)}
+.group-label h2{margin:0;font:500 19px/1.2 var(--serif);color:var(--bright)}
+.group-label .n{font-size:15px;color:var(--text-dim);font-variant-numeric:tabular-nums lining-nums}
+.group-label .btn-text{margin:-6px -8px -6px auto}
+.list{margin-top:8px}
+.list.waiting{margin-top:6px}
+
+/* ---------- Just dropped / From your feeds ---------- */
+.bucket{display:flex;align-items:center;gap:16px;width:100%;min-height:88px;margin:0;
+  padding:14px 0;background:none;border:0;border-top:1px solid var(--rule-faint);
+  color:inherit;text-align:left;font:inherit}
+.bucket.feedb{min-height:0}
+.bucket:active{background:var(--surface-quiet)}
+@media (hover:hover){.bucket:hover{background:var(--surface-quiet)}}
+.bucket:focus-visible,.intent:focus-visible{outline-offset:-2px}
+/* A fixed box even for one photo, so the names line up down the list. */
+.deck{position:relative;flex:none;width:132px;height:56px}
+.deck .tn{position:absolute;top:0;width:56px;height:56px;box-shadow:0 0 0 2px var(--ground)}
+.deck .tn:nth-child(1){left:0;z-index:3}
+.deck .tn:nth-child(2){left:36px;z-index:2}
+.deck .tn:nth-child(3){left:72px;z-index:1}
+.bk-main{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.bk-main .k{font-size:13px;line-height:1.3;color:var(--text-dim)}
+.bk-name{font:500 17px/1.25 var(--serif);color:var(--bright);overflow-wrap:anywhere}
+.bk-meta{font-size:13px;line-height:1.35;color:var(--text-dim);font-variant-numeric:tabular-nums lining-nums}
+.bk-meta b{font-weight:400;color:var(--text)}
+.bk-star{flex:none;display:inline-flex;align-items:center;gap:4px;color:var(--bright);
+  font:600 13px/1 var(--sans);font-variant-numeric:tabular-nums lining-nums}
+
+/* ---------- In stock, Held, Failing ---------- */
+.row{display:flex;gap:14px;align-items:flex-start;padding:16px 0 4px}
+.row > *{min-width:0}
+.row-top{display:flex;gap:14px;align-items:flex-start}
+.row-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+.name{font:500 17px/1.25 var(--serif);color:var(--bright);overflow-wrap:anywhere}
+.row.held .name{color:var(--text)}
+.meta{font-size:13px;line-height:1.4;color:var(--text-dim);overflow-wrap:anywhere}
+.meta b{color:var(--text);font-weight:500}
+.price{font:500 15px var(--sans);color:var(--bright);font-variant-numeric:tabular-nums lining-nums;
+  white-space:nowrap}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.row-text .actions{margin-top:8px}
+/* In stock and Failing are blocks that bleed past the content edge, so on a
+   phone they run edge to edge. */
+.row.act{margin:12px calc(-1*var(--bleed)) 0;padding:16px var(--bleed) 12px;
+  background:var(--tint-in-stock);flex-direction:column;align-items:stretch;gap:12px}
+.row.act + .row.act{margin-top:8px}
+.row-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:-6px}
+.row-foot .actions{gap:8px 16px;flex-wrap:nowrap}
+.row.broken{margin:12px calc(-1*var(--bleed)) 0;
+  padding:16px var(--bleed) 12px calc(var(--bleed) - 2px);background:var(--tint-failing);
+  border-left:2px solid var(--failing)}
+.row.broken + .row.broken{margin-top:8px}
+.row.broken .actions{gap:8px}
+.row.broken .btn-quiet{padding:0 14px}
+.err{font:13px/1.4 var(--mono);color:var(--failing);overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- Waiting ----------
+   The name owns the whole first line; the status wraps on the second. The
+   status once shared a line with the name in an `auto` track, grew to
+   "Watching · 739 tracked · 733 in the feed now", and left the name one
+   character wide — broken a letter per line down the whole screen. The only
+   thing beside the name now is Edit and ×, which cannot grow. */
+.wait{display:grid;grid-template-columns:minmax(0,1fr) auto auto;
+  grid-template-areas:"n n wa" "s t wa";column-gap:12px;align-items:center;padding:6px 0}
+.wait:nth-child(5n+1):not(:first-child){border-top:1px solid var(--rule-faint);margin-top:6px;
+  padding-top:12px}
+.wait .n{grid-area:n;line-height:20px;overflow-wrap:anywhere;font-size:15px;color:var(--text)}
+.wait .n .k{font-size:13px;color:var(--text-dim);margin-right:8px;white-space:nowrap}
+.wait .n .sz{font-size:13px;color:var(--muted)}
+.wait .s{grid-area:s;display:inline-flex;align-items:flex-start;gap:6px;font:500 13px/1.35 var(--sans);
+  min-width:0}
+.wait .s .glyph{margin-top:3px}
+.wait .p{display:none}
+.wait .t{grid-area:t;justify-self:end;align-self:start;font-size:13px;line-height:1.35;
+  color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums lining-nums}
+.wait .wa{grid-area:wa;display:flex;align-items:center;gap:8px;align-self:center}
+
+
+/* ---------- Stores you might watch ---------- */
+.sugg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;
+  padding:14px 0;border-top:1px solid var(--rule-faint)}
+.sugg .sn{font:500 17px/1.25 var(--serif);color:var(--bright);overflow-wrap:anywhere}
+.sugg .sn .k{display:block;font:400 13px/1.3 var(--sans);color:var(--text-dim);margin-bottom:2px}
+.sugg .sb{grid-column:1;font-size:13px;line-height:1.4;color:var(--text-dim)}
+.sugg .sb b{color:var(--text);font-weight:500}
+.sugg .sa{display:flex;gap:8px;grid-column:2;grid-row:1/span 2}
+/* In the narrow side column the buttons go under the words, as on a phone:
+   beside them they would leave a store's name about a hundred pixels. */
+.col-side .sugg .sa{grid-column:1/-1;grid-row:auto;margin-top:8px}
+.col-side .sugg .sa .btn-quiet{flex:1}
+
+/* ---------- Recent alerts ---------- */
+.feed{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:20px}
+.feed .t{flex:none;width:54px;padding-top:12px;font-size:13px;color:var(--muted);white-space:nowrap;
+  font-variant-numeric:tabular-nums lining-nums}
+.feed .fm{flex:1;min-width:0;padding-top:12px;overflow-wrap:anywhere;display:-webkit-box;
+  -webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.feed .fs{font-weight:500;color:var(--bright)}
+.feed .fs.bad{color:var(--failing)}
+.feed .fs .glyph{display:inline-block;vertical-align:-1px;margin-right:5px}
+.feed .fw{color:var(--text-dim)}
+.feed .fw a{color:inherit;text-decoration:none}
+
+
+/* ---------- empty and notes ---------- */
+.empty{font-size:15px;line-height:1.45;color:var(--text-dim);padding:24px 0;
+  border-top:1px solid var(--rule)}
+.empty .btn-quiet{margin-top:16px}
+.warn{background:var(--surface-quiet);border-left:2px solid var(--armed);padding:12px 14px;
+  margin:16px 0 0;font-size:13px;line-height:1.45;color:var(--text)}
+.warn b{color:var(--bright);font-weight:600}
+.warn .mono{font-size:13px}
+.warn.note{background:none;border:0;padding:0;margin:0;color:var(--text-dim);line-height:1.4}
+.warn.note b{color:var(--text);font-weight:500}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:24px;z-index:200;width:max-content;max-width:480px;
+  transform:translate(-50%,8px);opacity:0;background:var(--surface);border:1px solid var(--border);
+  color:var(--bright);font-size:14px;line-height:1.4;padding:12px 16px;
+  transition:opacity 160ms ease-out,transform 160ms ease-out}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.bad{border-color:var(--failing);color:var(--failing)}
+.toast.good{border-color:var(--in-stock)}
+
+/* ---------- sheets ---------- */
+.overlay{position:fixed;inset:0;z-index:100;display:flex;overflow-y:auto}
+#add{background-color:transparent;align-items:center;justify-content:center;padding:40px 20px}
+#add.open{background-color:var(--scrim);transition:background-color 200ms linear}
+.sheet{position:relative;width:100%;max-width:720px;background:var(--ground);border:1px solid var(--rule);
+  padding:28px 32px 0}
+#add .sheet{max-height:86vh;overflow-y:auto;overscroll-behavior:contain;opacity:0;
+  transform:translateY(8px)}
+#add .bucket-sheet{padding-top:0}
+/* Enter is 200ms and starts synchronously (showSheet forces a reflow); close
+   is instant, because the transition only exists in the open state. */
+#add.open .sheet{opacity:1;transform:none;
+  transition:opacity 200ms cubic-bezier(.2,.8,.2,1),transform 200ms cubic-bezier(.2,.8,.2,1)}
+.sheet h2{margin:0;font:400 26px/1.1 var(--serif);letter-spacing:-.01em;color:var(--bright)}
+.sheet .sub{margin:6px 0 0;font-size:13px;line-height:1.4;color:var(--text-dim);overflow-wrap:anywhere}
+.sheet .sub b{font-weight:500;color:var(--bright)}
+.sheet-actions{position:sticky;bottom:0;z-index:2;display:flex;align-items:center;flex-wrap:wrap;
+  gap:8px 16px;margin:24px -32px 0;padding:16px 32px 20px;background:var(--ground);
+  border-top:1px solid var(--rule)}
+.sheet-actions .strong{flex:1}
+.sheet-actions .err-line{font-size:13px;color:var(--failing)}
+.sheet .group-label{margin-top:24px}
+
+/* Drop sheet: the sheet itself scrolls, its heading and footer pinned. */
+.sheet-head{position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;gap:12px;
+  padding:28px 0 16px;background:var(--ground)}
+.sheet-head .hd{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.sheet-head .eyebrow{font-size:13px;line-height:1.3;color:var(--text-dim)}
+.sheet-head h2{overflow-wrap:anywhere}
+.sheet-head .sub{margin:0;font-size:13px;line-height:1.35;color:var(--text);
+  font-variant-numeric:tabular-nums lining-nums}
+.sheet-head .x{color:var(--text);margin-top:-4px}
+.bucket-sheet .sheet-actions > a.btn-ghost{flex:1}
+.bucket-sheet .sheet-actions .btn-text{margin-right:-8px}
+.item{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:16px 0;
+  border-top:1px solid var(--rule-faint)}
+.item-media{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.item-media > a{display:block}
+.item .tn{width:96px;height:96px}
+.item-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.item-head{display:flex;gap:6px;align-items:flex-start}
+.item-head .star{margin-top:4px}
+.item-title{font:500 17px/20px var(--serif);color:var(--bright);text-decoration:none;
+  overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden}
+.pl{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px}
+.landed{font-size:13px;color:var(--text-dim);white-space:nowrap;font-variant-numeric:tabular-nums lining-nums}
+.item-meta{font-size:13px;line-height:1.35;color:var(--muted);font-variant-numeric:tabular-nums lining-nums}
+.lag{display:inline-flex;align-items:center;gap:4px;color:var(--muted)}
+.lag.slow{color:var(--armed)}
+.item-acts{display:flex;align-items:center;gap:8px;margin-top:8px}
+.item-acts .btn-buy{min-width:64px;min-height:44px;padding:0 16px}
+.item-acts .x{margin-left:auto}
+.item-acts .caption{color:var(--muted)}
+
+/* Add a watch */
+#intents{display:flex;flex-direction:column;gap:8px;margin-top:24px}
+.intent{display:grid;grid-template-columns:12px 1fr;gap:12px;align-items:center;width:100%;
+  min-height:56px;padding:10px 14px;border:1px solid var(--border);background:transparent;
+  text-align:left;color:inherit}
+.intent .q{font:400 15px/1.35 var(--sans);color:var(--text)}
+.intent .ex{display:none;font-size:13px;line-height:1.35;color:var(--muted)}
+.intent[aria-pressed="true"]{background:var(--surface-quiet);border-color:var(--bright)}
+.intent[aria-pressed="true"] .q{color:var(--bright);font-weight:500}
+.field{display:flex;flex-direction:column;gap:8px;margin-top:24px}
+.field label{display:flex;justify-content:space-between;gap:12px;font:500 13px/1.3 var(--sans);
+  color:var(--text-dim)}
+.field label .hint{font-weight:400;color:var(--muted)}
+.field input{width:100%;min-height:48px;padding:0 14px;background:var(--surface);
+  border:1px solid var(--border);border-radius:0;color:var(--bright);font:400 16px var(--sans)}
+.field input[type="url"]{font-family:var(--mono)}
+.field input::placeholder{color:var(--muted)}
+.field input:focus{outline:2px solid var(--focus);outline-offset:2px}
+.field .aside{font-size:13px;line-height:1.4;color:var(--muted)}
+.detect{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:13px;line-height:1.35;
+  color:var(--text-dim)}
+.detect .glyph{margin-top:3px;color:var(--in-stock)}
+.detect b{font-weight:600;color:var(--bright)}
+.detect .l2{font-size:13px;color:var(--text-dim);margin-top:2px}
+.detect.bad{color:var(--failing)}
+.detect.bad .glyph{color:var(--failing)}
+.seg{display:flex;border:1px solid var(--border)}
+.seg button{flex:1;min-height:48px;background:transparent;border:0;color:var(--text-dim);
+  font:500 15px/1 var(--sans);font-variant-numeric:tabular-nums lining-nums}
+.seg button[aria-pressed="true"]{background:var(--surface);box-shadow:inset 0 0 0 1px var(--bright);
+  color:var(--bright);font-weight:600}
+
+/* Details */
+.check{display:grid;grid-template-columns:72px 56px 48px minmax(0,1fr);gap:12px;padding:8px 0;
+  border-top:1px solid var(--rule-faint);font-size:13px;font-variant-numeric:tabular-nums lining-nums}
+.check .ct{color:var(--muted)}
+.check .cr{display:inline-flex;align-items:center;gap:6px;font-weight:500}
+.check .cs,.check .ce{font-family:var(--mono);color:var(--text-dim)}
+.check .ce{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Why didn't this alert? */
+.fired{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:baseline;
+  padding:12px 0;border-top:1px solid var(--rule-faint)}
+.fired .fi{font:500 15px/1.35 var(--sans);color:var(--text);min-width:0}
+.fired .fi .k{display:block;font:400 13px/1.35 var(--sans);color:var(--text-dim);margin-bottom:2px}
+.fired .fi .k .tag{margin-left:8px}
+.fired .v{display:inline-flex;align-items:center;gap:6px}
+.fired .lines{font-size:13px;font-weight:400;line-height:1.5;color:var(--text);
+  font-variant-numeric:tabular-nums lining-nums}
+.fired .ft{font-size:13px;color:var(--muted)}
+
+/* Sign in is the page itself, not a sheet over one. */
+#login.overlay{background:var(--ground);align-items:center;justify-content:center;padding:24px var(--gutter)}
+#login .sheet{max-width:420px;padding:32px}
+#login .sheet-actions{position:static;margin:24px 0 0;padding:0;border-top:0;background:none}
+#login .sheet-actions .strong{flex:none;min-width:120px}
+#login .hint{margin-top:16px;font-size:13px;color:var(--muted)}
+
+.dock{display:none}
+
+/* ---------- desktop ---------- */
+@media (min-width:821px){
+  .hdr{padding-top:48px}
+  #headline{font-size:40px}
+  .counts{max-width:440px}
+  .hdr-actions{display:flex}
+  .intent{grid-template-columns:12px 1fr 240px}
+  .intent .ex{display:block}
+}
+
 /* ---------- the phone ----------
-   Its own layout, not the desktop one squeezed. Three rules drive it:
-
-   1. One column, and every row is two lines at most: what it is, then its
-      state. Nothing shares a line with a field that can grow, which is how the
-      name once ended up one letter wide and 490px tall.
-   2. The two things you come here to do — add a watch, ask why something
-      did not alert — sit in a dock at the bottom, where the thumb is, instead
-      of wrapping somewhere in the header.
-   3. Sheets rise from the bottom and scroll inside themselves, with their
-      primary button pinned in reach. Inputs are 16px, because iOS zooms the
-      whole page into anything smaller and never zooms back out — the
-      "spacing is all off" that followed every form. */
+   The same boundary as ever: a bottom dock, a stacked header, and sheets
+   that rise from the bottom, scroll inside themselves and keep their main
+   button in reach. */
 @media (max-width:820px){
-  .hdr{display:block;padding:18px max(16px,env(safe-area-inset-right)) 16px max(16px,env(safe-area-inset-left))}
-  .hdr-title{gap:6px}
-  .hdr h1{font-size:27px}
-  .hdr-side{display:block}
-  .hdr-actions{display:none}
-  .counts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;
-    margin-top:16px;border:1px solid var(--border)}
-  .stat{padding:11px 10px 10px;border-left:1px solid var(--border);gap:7px}
-  .stat:first-child{border-left:0}
-  .stat b{font-size:22px}
-  /* Five figures share 343px on the smallest phone. Spaced capitals need
-     about 56px for "Buyable" and the cell has 48, so here the labels drop
-     to plain words rather than an ellipsis. */
-  .stat span{font-size:11px;letter-spacing:0;text-transform:none}
+  .hdr,.body{padding-left:max(var(--gutter),env(safe-area-inset-left));
+    padding-right:max(var(--gutter),env(safe-area-inset-right))}
+  .body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .cols{display:block}
+  .col-main,.col-side,.one-col{max-width:none}
+  .col-side .sugg .sa{margin-top:0}
 
-  .body{padding:0 max(16px,env(safe-area-inset-right)) calc(100px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
-  .group-label{padding:24px 0 10px}
+  .dock{display:flex;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    padding:12px max(var(--gutter),env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left));
+    background:var(--ground);border-top:1px solid var(--rule)}
+  .dock button{min-height:44px;padding:0 12px}
+  .dock .btn-ghost:not(.theme){flex:1}
 
-  .dock{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:50;
-    padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
-    background:var(--ground);border-top:1px solid var(--border)}
-  .dock button{min-height:48px;padding:0 10px;letter-spacing:.1em;white-space:nowrap}
-  .dock .btn-ghost{flex:1}
-  .dock .btn-accent{flex:1.1}
-  .dock .btn-ghost.theme{flex:none;width:48px;padding:0}
+  .sugg .sa{grid-column:1/-1;grid-row:auto}
+  .sugg .sa .btn-quiet{flex:1}
+
   .toast{bottom:calc(88px + env(safe-area-inset-bottom));width:calc(100% - 32px);max-width:none}
 
-  .bucket{grid-template-columns:78px minmax(0,1fr) 16px;gap:14px;padding:14px 0}
-  .deck{width:78px;height:58px}
-  .deck .tn{width:58px;height:58px}
-  .deck .tn:nth-child(2){left:10px}
-  .deck .tn:nth-child(3){left:20px}
-  .bk-name{font-size:19px}
-  .bk-go span{display:none}
-  .bk-go i{font-size:22px;padding:0;color:var(--muted)}
+  #add{align-items:flex-end;padding:0;overflow:hidden}
+  .sheet{max-width:none;border:0;border-top:1px solid var(--rule);padding:0 var(--gutter)}
+  #add .sheet{max-height:92vh;max-height:92dvh;opacity:1;transform:translateY(100%)}
+  #add.open .sheet{transform:none;transition:transform 200ms cubic-bezier(.2,.8,.2,1)}
+  #add .sheet::before{content:'';display:block;width:36px;height:4px;background:var(--border);
+    border-radius:2px;margin:8px auto 6px}
+  .sheet-actions{margin:24px calc(-1*var(--gutter)) 0;
+    padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom))}
+  /* The drop sheet's grab handle rides in its pinned head. */
+  #add .bucket-sheet::before{display:none}
+  .sheet-head{padding:20px 0 14px}
+  .sheet-head::before{content:'';position:absolute;top:8px;left:50%;margin-left:-18px;width:36px;
+    height:4px;background:var(--border);border-radius:2px}
+  .fired .ft{grid-column:1/-1}
+  .check{grid-template-columns:60px 52px 40px minmax(0,1fr);gap:8px}
 
-  /* Product rows: photo beside the words, actions across the full width
-     below them where a thumb can reach every chip. */
-  .row{grid-template-columns:72px minmax(0,1fr);gap:12px 14px;padding:18px 0;align-items:start}
-  .row > :last-child{grid-column:1/-1}
-  .shot,.shot.sm{height:72px}
-  .name{font-size:22px}
-  .name.sm{font-size:20px}
-  .actions{justify-content:flex-start}
-  .caption{text-align:left}
-
-  /* Two lines, not three columns. The status sits in an `auto` track, so it
-     takes whatever width its text needs and the name gets the remainder — and
-     when the status grew to "Watching · 739 tracked · 733 in the feed now"
-     the remainder was about one character wide. `overflow-wrap:anywhere` then
-     did as it was told and broke the name one letter per line, down the whole
-     screen. Giving the name its own full-width row means nothing competes
-     with it for space, whatever the status ends up saying. */
-  .wait{grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;padding:12px 0}
-  .wait .n{grid-column:1/-1;overflow-wrap:anywhere;font-size:15px}
-  .wait .n .k{display:block;padding:0 0 3px}
-  .wait .p,.wait .t{display:none}
-  .wait .s{grid-column:1;justify-self:start;text-align:left}
-  .wait .wa{grid-column:2;justify-self:end}
-  .fired{grid-template-columns:1fr 84px 44px;gap:8px 10px}
-  /* The price column used to be dropped entirely here. That is survivable for
-     a sticker price and not for a landed cost, which is the number the whole
-     decision turns on — and the phone is where these are actually read. Move
-     it under the title instead of hiding it. */
-  .fired .fp{grid-column:1;font-size:13px;color:var(--muted)}
-  .fired .ft{grid-column:1;font-size:10px}
-  .sugg .sa{grid-row:auto;grid-column:1/-1}
-  .sugg .sa .chip{flex:1;min-height:44px}
-  .feed{grid-template-columns:auto 1fr 44px;gap:4px 12px}
-  /* Ellipsis on a 430px column leaves "www.ninte…", which names nothing.
-     Wrapping costs a line and keeps the row readable. */
-  .feed .fw{grid-column:1/-1;white-space:normal;overflow:visible}
-  .feed .x{grid-row:1;grid-column:3}
-
-  /* Sheets rise from the bottom and scroll inside themselves. */
-  .overlay{align-items:flex-end;padding:0;overflow:hidden}
-  .sheet,.sheet.bucket-sheet{max-width:none;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);
-    overflow-y:auto;overscroll-behavior:contain;border:0;border-top:1px solid var(--rule);
-    padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
-  .sheet::before{content:'';display:block;width:36px;height:3px;background:var(--faint);margin:10px auto 16px}
-  .sheet h2{font-size:24px}
-  .sheet .sub{font-size:13px}
-  .sheet-actions{position:sticky;bottom:0;z-index:2;background:var(--ground);gap:10px 18px;
-    margin-top:22px;padding:14px 0 calc(14px + env(safe-area-inset-bottom))}
-  .sheet-head{padding:4px 0 14px}
-  .bucket-sheet .sheet-actions{padding:14px 0 calc(14px + env(safe-area-inset-bottom))}
-  .field input{font-size:16px}
-  /* Sign-in is the first thing the page shows, not a sheet over something. */
-  #login.overlay{align-items:flex-start;padding:24px 16px;overflow-y:auto}
-  #login .sheet{border:1px solid var(--rule);padding:24px 18px}
-  #login .sheet::before{display:none}
-  #login .sheet-actions{position:static;padding-bottom:0}
-
-  .intent{grid-template-columns:22px 1fr;gap:12px}
-  .intent .ex{display:none}
-  .item{grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:start;padding:14px 0}
-  .item .tn{width:64px;height:64px}
-  .item-title{font-size:16px}
-  /* Under the words, beside the photo: a full-width button row made every
-     product 150px tall and the sheet showed three at a time. */
-  .item-acts{grid-column:2}
-  .item-acts .chip{flex:1;min-width:0}
-  .item-acts .chip.primary{flex:1.5}
-  .btn-text,.chip,.seg button{min-height:44px}
-  /* A destructive control needs a real tap target, and the inline style that
-     sizes it on desktop has to be overridden explicitly to get one. */
-  .x{width:44px!important;height:44px!important;font-size:22px!important}
+  #login.overlay{align-items:flex-start}
+  #login .sheet{padding:24px 18px;border:1px solid var(--rule)}
 }
-body.locked{overflow:hidden}
+
+@media (prefers-reduced-motion:reduce){
+  #add.open,#add.open .sheet,.toast{transition-duration:1ms!important}
+}
 </style>
 </head>
 <body>
 
 <div id="login" class="overlay hide">
-  <div class="sheet" style="max-width:420px">
+  <div class="sheet">
     <h2>Restock</h2>
     <p class="sub" id="loginNote">Enter your dashboard password.</p>
-    <div class="field" style="margin-top:0">
+    <div class="field">
       <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
     </div>
     <div class="sheet-actions">
-      <button class="btn-accent" onclick="doLogin()">Sign in</button>
-      <span id="loginErr" style="font-size:12px;color:var(--failing)"></span>
+      <button class="btn-quiet strong" onclick="doLogin()">Sign in</button>
+      <span id="loginErr" class="err-line"></span>
     </div>
+    <p class="hint">Faster: send <span class="mono">/login</span> to Muz in Telegram.</p>
   </div>
 </div>
 
 <main id="app" class="hide">
   <header class="hdr">
-    <div class="hdr-title">
+    <div class="hdr-row1">
       <span class="eyebrow" id="eyebrow">Your list</span>
-      <h1 id="headline">—</h1>
-    </div>
-    <div class="hdr-side">
-      <div class="counts" id="counts"></div>
       <div class="hdr-actions">
         <button class="btn-ghost theme" onclick="toggleTheme()"></button>
         <button class="btn-ghost" onclick="openInspect()">Why no alert?</button>
         <button class="btn-ghost" onclick="openAdd()">Add a watch</button>
       </div>
     </div>
+    <div class="hdr-row2">
+      <h1 id="headline">—</h1>
+      <div class="counts" id="counts"></div>
+    </div>
   </header>
   <div class="body">
     <div id="warnings"></div>
     <div id="sheet" aria-live="polite"></div>
   </div>
-  <!-- The phone's two primary actions, where a thumb already is. On a wide
+  <!-- The phone's primary actions, where a thumb already is. On a wide
        screen they live in the header instead and this is not rendered. -->
   <nav class="dock" aria-label="Actions">
     <button class="btn-ghost theme" onclick="toggleTheme()"></button>
     <button class="btn-ghost" onclick="openInspect()">Why no alert?</button>
-    <button class="btn-accent" onclick="openAdd()">Add a watch</button>
+    <button class="btn-ghost btn-accent" onclick="openAdd()">Add a watch</button>
   </nav>
 </main>
 
@@ -497,7 +561,7 @@ function paintThemeButtons() {
     b.setAttribute('aria-label', `Switch to ${next} mode`);
     b.title = `Switch to ${next} mode`;
   });
-  $('themeColor').content = isLight() ? '#f6f2ea' : '#100f0d';
+  $('themeColor').content = isLight() ? '#F4EFE6' : '#171513';
 }
 function toggleTheme() {
   if (isLight()) delete document.documentElement.dataset.theme;
@@ -512,10 +576,16 @@ let WATCHES = [], EVENTS = [], BUCKETS = [], SUGGESTED = [], TIMER = null, INTEN
 let OPEN_BUCKET = null, OPEN_SIG = '';
 let PENDING_FILTER = null;   // a suggested store's brand filter, until saved
 
+/* Enters rising, holds four seconds, fades, then goes. role=status so a
+   screen reader says it once without stealing focus. */
 function toast(msg, kind = '') {
   const t = document.createElement('div');
   t.className = 'toast ' + kind; t.textContent = msg;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 4500);
+  t.setAttribute('role', 'status');
+  document.body.appendChild(t);
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 160); }, 4000);
 }
 
 async function api(path, opts = {}) {
@@ -526,25 +596,50 @@ async function api(path, opts = {}) {
   return body;
 }
 
-/* Every state pairs a SHAPE with a WORD, so colour is never load-bearing. */
+/* ---------- glyphs (design/kinari/glyphs.js) ----------
+   Every state pairs a SHAPE with a WORD, so colour is never load-bearing. */
+const svg = (body, size = 12, box = '0 0 12 12', cls = 'glyph') =>
+  `<svg class="${cls}" viewBox="${box}" width="${size}" height="${size}" aria-hidden="true">${body}</svg>`;
+const RING = '<circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/>';
+
 const GLYPH = {
-  in_stock:    '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="4.5" fill="currentColor"/></svg>',
-  held:        '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3.8" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
-  out_of_stock:'<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3.7" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
-  failing:     '<svg width="11" height="11" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="2.4" y1="7.6" x2="7.6" y2="2.4" stroke="currentColor" stroke-width="1.3"/></svg>',
-  unknown:     '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2.2 2.2"/></svg>',
-  watching:    '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.4" fill="currentColor"/></svg>',
-  armed:       '<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="1.5" width="7" height="7" transform="rotate(45 5 5)" fill="currentColor"/></svg>',
-  paused:      '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x="2" y="2" width="2.2" height="6" fill="currentColor"/><rect x="5.8" y="2" width="2.2" height="6" fill="currentColor"/></svg>',
+  in_stock:     svg('<circle cx="6" cy="6" r="4.5" fill="currentColor"/>'),
+  held:         svg(RING + '<path d="M6 1.5a4.5 4.5 0 0 0 0 9z" fill="currentColor"/>'),
+  out_of_stock: svg(RING),
+  not_yet:      svg(RING + '<path d="M6 6V3.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'),
+  watching:     svg(RING + '<circle cx="6" cy="6" r="1.6" fill="currentColor"/>'),
+  unknown:      svg('<circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2.1 1.43"/>'),
+  failing:      svg('<path d="M6 1.3 10.9 10.4H1.1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 4.8v2.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'),
+  paused:       svg('<path d="M2.5 2h2.5v8H2.5zM7 2h2.5v8H7z" fill="currentColor"/>'),
+  armed:        svg('<path d="M6 1 11 6 6 11 1 6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle class="tick" cx="6" cy="6" r="1.6" fill="currentColor"/>', 12, '0 0 12 12', 'glyph armed'),
+  backoff:      svg('<path d="M1.5 2h2v8h-2zM5 4h2v6H5zM8.5 6h2v4h-2z" fill="currentColor"/>'),
 };
+
+/* The 10-second redraw replaces rows. A negative delay keeps every Armed blink
+   on one continuous clock instead of restarting it on each redraw. */
+const armedGlyph = () => GLYPH.armed.replace('class="tick"',
+  `class="tick" style="animation-delay:-${Date.now() % 2400}ms"`);
+
 /* A product that has never been on sale is not sold out — the storefront
    says "Coming Soon" for one and "Notify Me When Available" for the other,
    and calling both sold out loses the distinction that matters most. */
-const WORD = {in_stock: 'In stock', held: 'Held', out_of_stock: 'Sold out',
-              failing: 'Failing', unknown: 'No baseline', watching: 'Watching', paused: 'Paused'};
+const WORD = {in_stock: 'In stock', held: 'Held', out_of_stock: 'Sold out', not_yet: 'Not yet on sale',
+  failing: 'Failing', unknown: 'No baseline', watching: 'Watching', paused: 'Paused',
+  armed: 'Armed', backoff: 'Backing off'};
+
 const INK = {in_stock: 'var(--in-stock)', held: 'var(--held)', out_of_stock: 'var(--muted)',
-             failing: 'var(--failing)', unknown: 'var(--no-baseline)',
-             watching: 'var(--text)', paused: 'var(--dim)'};
+  not_yet: 'var(--muted)', failing: 'var(--failing)', unknown: 'var(--no-baseline)',
+  watching: 'var(--text)', paused: 'var(--muted)', armed: 'var(--armed)', backoff: 'var(--armed)'};
+
+const ICON = {
+  star:    svg('<path d="M6 .9 7.5 4.1l3.5.4-2.6 2.4.7 3.5L6 8.7l-3.1 1.7.7-3.5L1 4.5l3.5-.4z" fill="currentColor"/>', 12, '0 0 12 12', 'icon'),
+  x:       svg('<path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5"/>', 12, '0 0 12 12', 'icon'),
+  disc:    svg('<circle cx="4" cy="4" r="3.5" fill="currentColor"/>', 8, '0 0 8 8', 'icon'),
+  arrow:   '<svg class="icon" viewBox="0 0 14 10" width="14" height="10" aria-hidden="true"><path d="M1 5h11M8 1.2 11.8 5 8 8.8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  radio:   svg(RING, 12, '0 0 12 12', 'icon'),
+  radioOn: svg(RING + '<circle cx="6" cy="6" r="2.2" fill="currentColor"/>', 12, '0 0 12 12', 'icon'),
+  nophoto: svg('<path d="M6.4 4.6a1.6 1.6 0 1 1 2.1 1.5c-.3.1-.5.4-.5.7v.8l6.3 4.2H1.7L8 7.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>', 16, '0 0 16 16', 'icon'),
+};
 
 /* Derived state. `armed` stays orthogonal and is never folded in — a watch can
    be failing and armed at once, and both must render. */
@@ -559,10 +654,6 @@ const isArmed = w => w.hot_until && asDate(w.hot_until) > new Date();
    slower cadence would be invisible. */
 const isBackingOff = w => (w.consecutive_failures || 0) === 0
   && /rate limited/i.test(w.last_error || '');
-const backoffBadge = () =>
-  `<span class="state-eyebrow" style="color:var(--armed);letter-spacing:.18em"` +
-  ` title="The store asked for fewer requests. Polling has slowed; nothing is broken.">` +
-  `${GLYPH.paused}Backing off</span>`;
 /* Detection names a collection watch "host · handle" and separately sets
    brand=host, so rendering both prints the host twice. Show only the part the
    kicker does not already say. */
@@ -606,20 +697,52 @@ const money = (v, cur) => v == null ? '—' :
 
 /* A yen store rendered with a dollar sign is wrong by a factor of about 142,
    in the flattering direction. */
-const SYMBOLS = {USD: '$', JPY: '\u00a5', EUR: '\u20ac', GBP: '\u00a3',
+const SYMBOLS = {USD: '$', JPY: '¥', EUR: '€', GBP: '£',
                  CAD: '$', AUD: '$'};
 const symbolFor = cur => SYMBOLS[(cur || 'USD').toUpperCase()] || ((cur || '') + ' ');
 
-const eyebrowFor = (state, extra) =>
-  `<span class="state-eyebrow" style="color:${INK[state]}">${GLYPH[state] || ''}` +
-  `${esc(WORD[state])}${extra ? ' · ' + esc(extra) : ''}</span>`;
-const armedBadge = () =>
-  `<span class="state-eyebrow" style="color:var(--armed);letter-spacing:.18em">` +
-  `<span class="pulse" style="display:inline-flex">${GLYPH.armed}</span>Armed</span>`;
-const shot = (w, cls, edge, caption) =>
-  `<div class="shot ${cls}" style="border:1px solid ${edge};` +
-  `${w.last_image ? "background-image:url('" + esc(w.last_image) + "')" : ''}">` +
-  `${!w.last_image && caption ? '<span>shot</span>' : ''}</div>`;
+/* A state is a glyph and a word; a time, when there is one, is quieter. */
+const eyebrowFor = (state, extra, time) =>
+  `<span class="state-eyebrow" style="color:${INK[state]}">` +
+  `${state === 'armed' ? armedGlyph() : (GLYPH[state] || '')}` +
+  `<span>${esc(WORD[state])}${extra ? ' · ' + esc(extra) : ''}` +
+  `${time ? `<span class="when"> · ${esc(time)}</span>` : ''}</span></span>`;
+const armedBadge = () => eyebrowFor('armed');
+const backoffBadge = () =>
+  `<span class="state-eyebrow" style="color:var(--armed)"` +
+  ` title="The store asked for fewer requests. Polling has slowed; nothing is broken.">` +
+  `${GLYPH.backoff}<span>Backing off</span></span>`;
+
+/* ---------- photos ---------- */
+
+/* Store photos at thumbnail size. Shopify's CDN resizes on request, so a
+   64px square on a phone does not cost the 2000px original. Anything that
+   is not plainly http(s) is refused rather than handed to an <img>. */
+function thumbUrl(src, px) {
+  if (!src || !/^https?:\/\//i.test(src)) return '';
+  try {
+    const u = new URL(src);
+    if (u.hostname === 'cdn.shopify.com' || u.pathname.includes('/cdn/shop/'))
+      u.searchParams.set('width', String(px));
+    return u.href;
+  } catch (err) { return ''; }
+}
+/* Links in the drop sheet come partly from third-party feeds. Only plain
+   http(s) is allowed through to an href; anything else renders as no link. */
+const safeHref = u => /^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '';
+
+/* No photo says so, rather than leaving a blank that reads as broken. It is
+   swapped in for a failed image, never layered under one: with multiply it
+   would show through a white product background. */
+const NOPHOTO = () => `<span class="nophoto">${ICON.nophoto}no photo</span>`;
+function noPhoto(img) { img.outerHTML = NOPHOTO(); }
+const photo = (src, px) => {
+  const u = thumbUrl(src, px * 2);
+  return u ? `<img src="${esc(u)}" alt="" loading="lazy" decoding="async"`
+    + ` referrerpolicy="no-referrer" onerror="noPhoto(this)">` : NOPHOTO();
+};
+const thumb = (src, px) => `<span class="tn">${photo(src, px)}</span>`;
+const shot = (w, cls) => `<span class="shot ${cls || ''}">${photo(w.last_image, cls === 'sm' ? 72 : 96)}</span>`;
 
 /* ---------- rows ---------- */
 
@@ -633,54 +756,59 @@ function actRow(w) {
   const rest = named.filter(o => !o.preferred);
   const sized = named.length > 0;
 
-  let action;
+  let action, caption;
   if (sized && usable.length) {
     /* Sold-out sizes are absent, never disabled — a disabled button invites a
        tap that cannot work. */
     const chips = [...pref, ...rest].slice(0, 6).map((o, i) => {
       const lead = i === 0 && pref.length > 0;
-      return `<button class="chip${lead ? ' primary' : ''}"
-        aria-label="Add size ${esc(o.title)} to cart"
-        onclick="window.open('${esc(o.cart_url)}','_blank','noopener')">${esc(o.title)}${lead ? ' ⟶ cart' : ''}</button>`;
+      return `<button class="chip btn-buy"
+        aria-label="Add size ${esc(o.title)}${lead ? ', your size,' : ''} to cart"
+        onclick="window.open('${esc(o.cart_url)}','_blank','noopener')">${lead ? ICON.disc : ''}${esc(o.title)}${lead ? ICON.arrow + 'cart' : ''}</button>`;
     }).join('');
-    action = `<div class="chips">${chips}</div>
-      <span class="caption">each chip is that size's cart link</span>`;
+    action = `<div class="chips">${chips}</div>`;
+    caption = pref.length
+      ? `<span class="caption"><span class="star">${ICON.disc}</span>your size · each chip is that size's cart link</span>`
+      : `<span class="caption">each chip is that size's cart link</span>`;
   } else {
     const cart = (usable[0] || {}).cart_url;
-    action = `<button class="chip primary" style="flex:none;width:100%;padding:15px"
-        onclick="window.open('${esc(cart || w.url)}','_blank','noopener')">
-        ${cart ? 'Add to cart' : 'Open product'}</button>
-      <span class="caption">${cart ? 'cart permalink · skips product page'
-        : 'no cart link · opens the product page'}</span>`;
+    action = cart
+      ? `<div class="chips"><button class="chip btn-buy addcart"
+          onclick="window.open('${esc(cart)}','_blank','noopener')">Add to cart</button></div>`
+      : `<div class="chips"><button class="btn-quiet"
+          onclick="window.open('${esc(w.url)}','_blank','noopener')">Open product</button></div>`;
+    caption = `<span class="caption">${cart ? 'cart permalink · skips product page'
+      : 'no cart link · opens the product page'}</span>`;
   }
 
   const watched = (w.size_pref || '').toUpperCase();
   const back = realSizes(w).join(', ');
-  const bits = [money(w.last_price, w.currency)];
+  const bits = [`<span class="price">${money(w.last_price, w.currency)}</span>`];
   if (watched) bits.push('watching <b>' + esc(watched) + '</b>');
   if (back) bits.push(esc(back) + ' returned');
   bits.push('every ' + every(w) + (isArmed(w) ? ', armed' : ''));
 
   return `<div class="row act">
-    ${shot(w, '', 'var(--in-stock)', true)}
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        ${eyebrowFor('in_stock', (watched ? 'your size · ' : '') + ago(w.last_checked_at))}
-        ${isArmed(w) ? armedBadge() : ''}
-        ${isBackingOff(w) ? backoffBadge() : ''}
-      </div>
-      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+    <div class="row-top">
+      ${shot(w)}
+      <div class="row-text">
+        <div class="states">
+          ${eyebrowFor('in_stock', watched ? 'your size' : '', ago(w.last_checked_at))}
+          ${isArmed(w) ? armedBadge() : ''}
+          ${isBackingOff(w) ? backoffBadge() : ''}
+        </div>
+        ${w.brand ? `<span class="kicker">${esc(w.brand)}</span>` : ''}
         <span class="name">${esc(w.last_title || w.name)}</span>
-        <span class="kicker">${esc(w.brand || '')}</span>
+        <span class="meta">${bits.join(' · ')}</span>
       </div>
-      <span class="meta">${bits.join(' · ')}</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      ${action}
-      <div class="actions" style="gap:14px">
-        <button class="btn-text" style="color:var(--muted)" onclick="edit(${w.id})">Edit</button>
-        <button class="btn-text" style="color:var(--muted)" onclick="detail(${w.id})">Details</button>
-      </div>
+    ${action}
+    <div class="row-foot">
+      ${caption}
+      <span class="actions">
+        <button class="btn-text" onclick="edit(${w.id})">Edit</button>
+        <button class="btn-text" onclick="detail(${w.id})">Details</button>
+      </span>
     </div>
   </div>`;
 }
@@ -691,58 +819,54 @@ function heldRow(w) {
   const back = realSizes(w).join(', ');
   const first = back ? back.split(',')[0].trim() : '';
   const watched = (w.size_pref || '').toUpperCase();
-  return `<div class="row">
-    ${shot(w, 'sm', 'var(--held-edge)')}
-    <div style="display:flex;flex-direction:column;gap:7px">
-      ${eyebrowFor('held', 'not your size · ' + ago(w.last_checked_at))}
-      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
-        <span class="name sm" style="color:var(--held-name)">${esc(w.last_title || w.name)}</span>
-        <span class="kicker" style="color:var(--muted)">${esc(w.brand || '')}</span>
-      </div>
-      <span class="meta">${money(w.last_price, w.currency)} · in stock in
+  return `<div class="row held">
+    ${shot(w, 'sm')}
+    <div class="row-text">
+      ${eyebrowFor('held', 'not your size', ago(w.last_checked_at))}
+      ${w.brand ? `<span class="kicker">${esc(w.brand)}</span>` : ''}
+      <span class="name">${esc(w.last_title || w.name)}</span>
+      <span class="meta"><span class="price">${money(w.last_price, w.currency)}</span> · in stock in
         <b>${esc(back || 'another size')}</b> only · you watch <b>${esc(watched)}</b>
         · nothing sent, and nothing wrong</span>
-    </div>
-    <div class="actions">
-      ${first ? `<button class="btn-text" style="color:var(--accent)"
-        onclick="alsoAlert(${w.id},'${esc(first)}')">Also alert on ${esc(first)}</button>` : ''}
-      <button class="btn-text" style="color:var(--muted)" onclick="edit(${w.id})">Edit</button>
-      <button class="btn-text" style="color:var(--muted)" onclick="detail(${w.id})">Details</button>
+      <div class="actions">
+        ${first ? `<button class="btn-quiet"
+          onclick="alsoAlert(${w.id},'${esc(first)}')">Also alert on ${esc(first)}</button>` : ''}
+        <button class="btn-text" onclick="edit(${w.id})">Edit</button>
+        <button class="btn-text" onclick="detail(${w.id})">Details</button>
+      </div>
     </div>
   </div>`;
 }
 
-/* Failing must never inherit the calm sold-out treatment: hatched shot, red
-   border, the error verbatim, and an explicit statement that the shown state
-   is stale. */
+/* Failing must never inherit the calm sold-out treatment: a plum edge, the
+   photo drained of colour, the error verbatim, and an explicit statement that
+   the shown state is stale. The error is clamped here and whole in Details. */
 function brokenRow(w) {
   const known = w.last_state && w.last_state !== 'unknown';
   const stale = known
-    ? ` · the ${esc((WORD[w.last_state] || w.last_state)).toLowerCase()} reading you see is ` +
+    ? `the ${esc((WORD[w.last_state] || w.last_state)).toLowerCase()} reading you see is ` +
       esc(ago(w.last_checked_at).replace(' ago', '')) + ' old'
-    : ' · this watch has never returned a reading';
+    : 'this watch has never returned a reading';
   const n = w.consecutive_failures || 0;
   return `<div class="row broken">
-    <div class="shot sm" style="border:1px solid var(--bad-edge);
-      background:repeating-linear-gradient(135deg,var(--broken-a) 0 8px,var(--broken-b) 8px 16px)"></div>
-    <div style="display:flex;flex-direction:column;gap:7px">
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    ${shot(w, 'sm')}
+    <div class="row-text">
+      <div class="states">
         ${eyebrowFor('failing', 'stale state')}
         ${isArmed(w) ? armedBadge() : ''}
         ${w.paused ? eyebrowFor('paused', 'after ' + n + ' failures') : ''}
       </div>
-      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
-        <span class="name sm">${esc(w.last_title || w.name)}</span>
-        <span class="kicker" style="color:var(--muted)">${esc(w.brand || '')}</span>
+      ${w.brand ? `<span class="kicker">${esc(w.brand)}</span>` : ''}
+      <span class="name">${esc(w.last_title || w.name)}</span>
+      <div class="err" title="${esc(w.last_error || 'unknown error')}">${esc(w.last_error || 'unknown error')}</div>
+      <span class="meta num">${n} failure${n === 1 ? '' : 's'} · ${stale}</span>
+      <div class="actions">
+        <button class="btn-quiet" onclick="edit(${w.id})">Fix URL</button>
+        <button class="btn-quiet" onclick="checkNow(${w.id},this)">Check now</button>
+        <button class="btn-quiet"
+          onclick="togglePause(${w.id},${w.paused ? 1 : 0})">${w.paused ? 'Resume' : 'Pause'}</button>
+        <button class="btn-text" onclick="detail(${w.id})">Details</button>
       </div>
-      <span class="meta"><span class="mono" style="color:var(--failing)">${esc(w.last_error || 'unknown error')}</span>
-        · ${n} failure${n === 1 ? '' : 's'}${stale}</span>
-    </div>
-    <div class="actions">
-      <button class="btn-text" style="color:var(--accent)" onclick="edit(${w.id})">Fix URL</button>
-      <button class="btn-text" style="color:var(--muted)" onclick="checkNow(${w.id},this)">Check now</button>
-      <button class="btn-text" style="color:var(--muted)"
-        onclick="togglePause(${w.id},${w.paused ? 1 : 0})">${w.paused ? 'Resume' : 'Pause'}</button>
     </div>
   </div>`;
 }
@@ -752,8 +876,7 @@ function waitRow(w) {
   const armed = isArmed(w);
   /* Never been on sale as far as we have seen: "Not yet on sale", not
      "Sold out". */
-  const stateWord = (w, st) =>
-    st === 'out_of_stock' && w.ever_buyable === false ? 'Not yet on sale' : WORD[st];
+  const key = st === 'out_of_stock' && w.ever_buyable === false ? 'not_yet' : st;
 
   let tracked = '';
   if (w.kind === 'collection' && w.baseline_json) {
@@ -763,27 +886,26 @@ function waitRow(w) {
          difference between "717 on sale" and "717 remembered, 690 on sale". */
       const known = JSON.parse(w.baseline_json).length;
       const live = w.last_seen_count;
-      tracked = ' · ' + known + ' tracked'
-              + (live != null && live !== known ? ` · ${live} in the feed now` : '');
+      tracked = ' · ' + known.toLocaleString() + ' tracked'
+              + (live != null && live !== known ? ` · ${live.toLocaleString()} in the feed now` : '');
     } catch (e) {}
   }
   const status = isBackingOff(w)
-    ? `<span class="s" style="color:var(--armed)" title="${esc(w.last_error)}">${GLYPH.paused}Backing off</span>`
+    ? `<span class="s" style="color:var(--armed)" title="${esc(w.last_error)}">${GLYPH.backoff}<span>Backing off</span></span>`
     : armed
-    ? `<span class="s" style="color:var(--armed)"><span class="pulse" style="display:inline-flex">${GLYPH.armed}</span>Armed${esc(tracked)}</span>`
-    : `<span class="s" style="color:${INK[st]}">${['unknown', 'watching', 'paused'].includes(st) ? GLYPH[st] : ''}${esc(stateWord(w, st))}${esc(tracked)}</span>`;
+    ? `<span class="s" style="color:var(--armed)">${armedGlyph()}<span>Armed${esc(tracked)}</span></span>`
+    : `<span class="s" style="color:${INK[key]}">${GLYPH[key] || ''}<span>${esc(WORD[key] || st)}${esc(tracked)}</span></span>`;
   const size = w.size_pref
-    ? `<span style="color:var(--dim);font-size:12px"> · size ${esc(w.size_pref.toUpperCase())}</span>` : '';
+    ? `<span class="sz"> · size ${esc(w.size_pref.toUpperCase())}</span>` : '';
   return `<div class="wait">
     <span class="n"><span class="k">${esc(w.brand || '')}</span>${esc(shortName(w))}${size}</span>
     ${status}
     <span class="p">${w.last_price != null ? money(w.last_price, w.currency) : '—'}</span>
     <span class="t">${esc(ago(w.last_checked_at))} · ${esc(every(w))}</span>
     <span class="wa">
-      <button class="btn-text" style="color:var(--dim)" onclick="edit(${w.id})">Edit</button>
-      <button class="x" style="width:26px;height:26px;font-size:16px;vertical-align:middle"
-        title="Delete this watch" aria-label="Delete ${esc(w.name)}"
-        onclick="removeWatch(${w.id})">&times;</button>
+      <button class="btn-text" onclick="edit(${w.id})">Edit</button>
+      <button class="x edge" title="Delete this watch" aria-label="Delete ${esc(w.name)}"
+        onclick="removeWatch(${w.id})">${ICON.x}</button>
     </span>
   </div>`;
 }
@@ -853,40 +975,11 @@ function itemsOf(e) {
   });
 }
 
-/* Store photos at thumbnail size. Shopify's CDN resizes on request, so a
-   64px square on a phone does not cost the 2000px original. Anything that
-   is not plainly http(s) is refused rather than handed to an <img>. */
-function thumbUrl(src, px) {
-  if (!src || !/^https?:\/\//i.test(src)) return '';
-  try {
-    const u = new URL(src);
-    if (u.hostname === 'cdn.shopify.com' || u.pathname.includes('/cdn/shop/'))
-      u.searchParams.set('width', String(px));
-    return u.href;
-  } catch (err) { return ''; }
-}
-/* Links in the drop sheet come partly from third-party feeds. Only plain
-   http(s) is allowed through to an href; anything else renders as no link. */
-const safeHref = u => /^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '';
-
-/* A missing or broken photo leaves the hatch showing, never a broken-image
-   icon or a collapsed row. */
-const thumb = (src, px) => {
-  const u = thumbUrl(src, px * 2);
-  return `<span class="tn">${u ? `<img src="${esc(u)}" alt="" loading="lazy"`
-    + ` decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
-};
-
-/* A drop is one row, not a card.
-
-   The card was built to hold several items at once — "3 new · Satisfy" — but a
-   store lists one product at a time, so twenty drops became twenty full-height
-   cards and the list turned into the clutter it was meant to surface. One row
-   per item, each independently dismissable, says the same thing in a tenth of
-   the space. */
 /* How far behind the store we were when this fired. Shown only when the store
    gave us a publish time — an unknown lag has to read as unknown, never as
-   zero, or the number stops being trustworthy exactly when it matters. */
+   zero, or the number stops being trustworthy exactly when it matters. Past
+   five minutes it turns amber and gains a glyph, so the change is not colour
+   alone. */
 function lagNote(e) {
   const s = (e.payload || {}).listed_ago_s;
   if (typeof s !== 'number') return '';
@@ -894,7 +987,7 @@ function lagNote(e) {
                                         : Math.round(s / 3600) + 'h';
   const slow = s > 300;
   return `<span class="lag${slow ? ' slow' : ''}" title="Listed by the store `
-       + `${t} before we detected it">· ${t} behind</span>`;
+       + `${t} before we detected it">${slow ? GLYPH.backoff : ''}${t} behind</span>`;
 }
 
 /* What kind of arrival this was, in the words the storefront would use. A
@@ -904,16 +997,16 @@ function arrivalTag(it, e) {
   const p = e.payload || {};
   if (it.available === false && it.available_stated)
     return '<span class="tag soon" title="Listed, nothing buyable yet">coming soon</span>';
-  if (p.arrival === 'relisted') return '<span class="tag">relisted</span>';
+  if (p.arrival === 'relisted') return '<span class="tag relisted">relisted</span>';
   if (p.arrival === 'unconfirmed')
-    return '<span class="tag" title="The store gave no listing date, so this may not be new">unverified</span>';
+    return '<span class="tag unverified" title="The store gave no listing date, so this may not be new">unverified?</span>';
   if (p.arrival === 'launched') {
     /* Listed for a while, buyable as of now. Same split as the Telegram
        alert: never seen on sale is a release, seen before is a restock. */
     if (Array.isArray(p.first_sale))
       return p.first_sale.includes(it.handle)
         ? '<span class="tag now" title="Never on sale before, as far back as this watch has looked">released</span>'
-        : '<span class="tag now" title="On sale before, sold out, and buyable again">back in stock</span>';
+        : '<span class="tag now back" title="On sale before, sold out, and buyable again">back in stock</span>';
     return '<span class="tag now" title="Already listed; the store just made it buyable">now buyable</span>';
   }
   return '';
@@ -962,19 +1055,20 @@ function countLine(b) {
   return buyable === n ? `${n} buyable ${noun}` : `${n} ${noun} · ${buyable} buyable`;
 }
 
+/* The whole row is the button; there is no "View" to find. */
 function bucketRow(b) {
   const stars = b.rows.filter(r => r.it.starred).length;
   const photos = b.rows.map(r => r.it.image).filter(Boolean);
-  const deck = (photos.length ? photos : ['']).slice(0, 3).map(src => thumb(src, 64)).join('');
-  return `<button class="bucket" data-key="${esc(b.key)}" onclick="openBucket(this.dataset.key)">
-    <span class="deck">${deck}</span>
+  const deck = b.announce ? '' : `<span class="deck">${(photos.length ? photos : [''])
+    .slice(0, 3).map(src => thumb(src, 56)).join('')}</span>`;
+  return `<button class="bucket${b.announce ? ' feedb' : ''}" data-key="${esc(b.key)}" onclick="openBucket(this.dataset.key)">
+    ${deck}
     <span class="bk-main">
       ${b.kicker ? `<span class="k">${esc(b.kicker)}</span>` : ''}
       <span class="bk-name">${esc(b.title)}</span>
-      <span class="bk-meta"><b>${esc(countLine(b))}</b> · newest ${esc(ago(b.newestAt))}${stars
-        ? ` · <span class="star" title="Clear your gates">★</span> ${stars}` : ''}</span>
+      <span class="bk-meta"><b>${esc(countLine(b))}</b> · newest ${esc(ago(b.newestAt))}</span>
     </span>
-    <span class="bk-go"><span>View</span><i aria-hidden="true">›</i></span>
+    ${stars ? `<span class="bk-star" title="Clear your gates">${ICON.star}${stars}</span>` : ''}
   </button>`;
 }
 
@@ -984,33 +1078,35 @@ function bucketRow(b) {
 function itemRow(r) {
   const {e, a} = r;
   const it = {...r.it, url: safeHref(r.it.url), cart: safeHref(r.it.cart)};
-  const link = (href, label, cls) =>
-    `<a class="chip mini${cls}" href="${esc(href)}" target="_blank" rel="noopener">${label}</a>`;
   const acts = [
-    it.cart ? link(it.cart, 'Cart', ' primary') : '',
-    it.url ? link(it.url, a ? 'Read' : 'Open', it.cart ? '' : ' primary') : '',
+    it.cart ? `<a class="chip mini btn-buy" href="${esc(it.cart)}" target="_blank" rel="noopener">Cart</a>` : '',
+    it.url ? `<a class="chip mini btn-quiet" href="${esc(it.url)}" target="_blank" rel="noopener">${a ? 'Read' : 'Open'}</a>` : '',
   ].join('') || '<span class="caption">no link</span>';
   const star = it.starred
-    ? '<span class="star" title="Clears your gates — worth pricing against US retail">★</span> ' : '';
+    ? `<span class="star" title="Clears your gates — worth pricing against US retail">${ICON.star}</span>` : '';
   const tag = arrivalTag(it, e);
   const price = it.price != null
     ? `<span class="price">${money(it.price, e.watch_currency)}</span>` : '';
   const landed = it.landed != null
-    ? ` ≈$${Number(it.landed).toLocaleString(undefined, {maximumFractionDigits: 0})} landed` : '';
-  const meta = [price + landed, esc(ago(e.created_at)) + ' ' + lagNote(e)].filter(Boolean).join(' · ');
-  const photo = thumb(it.image, 76);
+    ? `<span class="landed">≈$${Number(it.landed).toLocaleString(undefined, {maximumFractionDigits: 0})} landed</span>` : '';
+  const meta = [esc(ago(e.created_at)), lagNote(e)].filter(Boolean).join(' · ');
+  const pic = thumb(it.image, 96);
   return `<div class="item">
-    ${it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${photo}</a>` : photo}
-    <div class="item-main">
-      ${star || tag ? `<span class="k">${star}${tag}</span>` : ''}
-      ${it.url ? `<a class="item-title" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)}</a>`
-               : `<span class="item-title">${esc(it.title)}</span>`}
-      <span class="item-meta">${meta}</span>
+    <div class="item-media">
+      ${it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${pic}</a>` : pic}
+      ${tag}
     </div>
-    <div class="item-acts">
-      ${acts}
-      <button class="x" title="Dismiss" aria-label="Dismiss ${esc(it.title)}"
-        data-e="${e.id}" data-h="${esc(it.handle)}" onclick="dismissItem(this)">&times;</button>
+    <div class="item-main">
+      <div class="item-head">${star}${it.url
+        ? `<a class="item-title" href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(it.title)}">${esc(it.title)}</a>`
+        : `<span class="item-title" title="${esc(it.title)}">${esc(it.title)}</span>`}</div>
+      ${price || landed ? `<div class="pl">${price}${landed}</div>` : ''}
+      <div class="item-meta">${meta}</div>
+      <div class="item-acts">
+        ${acts}
+        <button class="x edge" title="Dismiss" aria-label="Dismiss ${esc(it.title)}"
+          data-e="${e.id}" data-h="${esc(it.handle)}" onclick="dismissItem(this)">${ICON.x}</button>
+      </div>
     </div>
   </div>`;
 }
@@ -1034,18 +1130,18 @@ function renderBucket(first) {
   $('add').innerHTML = `<div class="sheet bucket-sheet" role="dialog" aria-modal="true"
       aria-label="${esc(b.title)}">
     <div class="sheet-head">
-      <div style="min-width:0">
+      <div class="hd">
         ${b.kicker ? `<span class="eyebrow">${esc(b.kicker)}</span>` : ''}
         <h2>${esc(b.title)}</h2>
         <p class="sub">${esc(countLine(b))} · newest ${esc(ago(b.newestAt))}</p>
       </div>
-      <button class="x" aria-label="Close" onclick="closeSheet()">&times;</button>
+      <button class="x edge" aria-label="Close" onclick="closeSheet()">${ICON.x}</button>
     </div>
     <div class="items">${b.rows.map(itemRow).join('')}</div>
     <div class="sheet-actions">
-      ${b.url ? `<a class="btn-text" style="color:var(--accent)" href="${esc(b.url)}"
+      ${b.url ? `<a class="btn-ghost" href="${esc(b.url)}"
         target="_blank" rel="noopener">Open the store</a>` : ''}
-      <button class="btn-text" style="color:var(--muted);margin-left:auto"
+      <button class="btn-text" style="margin-left:auto"
         onclick="clearBucket()">Clear all ${b.rows.length}</button>
     </div>
   </div>`;
@@ -1098,18 +1194,19 @@ function feedRow(e) {
   const items = itemsOf(e);
   const href = (items[0] || {}).url || p.product_url || e.watch_url || '';
   const label = FEED_WORD[e.kind] || e.kind;
-  const ink = e.kind === 'watch_failing' ? 'var(--failing)'
-            : e.kind === 'restock' ? 'var(--in-stock)' : 'var(--muted)';
+  const broke = e.kind === 'watch_failing';
+  const full = `${label} · ${evName(e)}${note ? ' · ' + note : ''}`;
   return `<div class="feed">
-    <span class="t" style="text-align:left">${esc(ago(e.created_at))}</span>
-    <span class="fs" style="color:${ink}">${esc(label)}</span>
-    <span class="fw">${href ? `<a href="${esc(href)}" target="_blank" rel="noopener">` : ''}${esc(evName(e))}${note ? ' · ' + esc(note) : ''}${href ? '</a>' : ''}</span>
-    <button class="x" style="width:26px;height:26px;font-size:16px"
-      title="Delete this alert" aria-label="Delete alert" onclick="dismiss(${e.id})">&times;</button>
+    <span class="t">${esc(ago(e.created_at))}</span>
+    <span class="fm" title="${esc(full)}"><span class="fs${broke ? ' bad' : ''}">${broke ? GLYPH.failing : ''}${esc(label)}</span><span class="fw"> · ${href ? `<a href="${esc(href)}" target="_blank" rel="noopener">` : ''}${esc(evName(e))}${note ? ' · ' + esc(note) : ''}${href ? '</a>' : ''}</span></span>
+    <button class="x edge" title="Delete this alert" aria-label="Delete alert" onclick="dismiss(${e.id})">${ICON.x}</button>
   </div>`;
 }
 
-/* ---------- the sheet ---------- */
+/* ---------- the page ---------- */
+
+const section = (title, n, extra, btn) =>
+  `<div class="group-label"><h2>${esc(title)}</h2><span class="n">· ${n}${extra || ''}</span>${btn || ''}</div>`;
 
 function render() {
   const act = [], held = [], broken = [], waiting = [];
@@ -1142,63 +1239,81 @@ function render() {
   const n = act.length + buy.length;
   $('headline').textContent = !WATCHES.length ? 'Nothing watched yet'
     : n === 0 ? 'Nothing to act on' : n + ' thing' + (n === 1 ? '' : 's') + ' to act on';
+  $('headline').classList.toggle('quiet', n === 0);
   $('eyebrow').textContent = 'Your list · ' + new Date().toLocaleDateString(undefined,
     {weekday: 'long', day: 'numeric', month: 'long'});
-  /* Colour only when there is something to see: a green 0 and a red 0
-     both read as news. */
+  /* Only a non-zero Buyable fills, and a zero is muted, so every figure that
+     stands out is something to look at. */
   const stat = (n, label, tone) =>
-    `<div class="stat ${n ? tone : 'zero'}"><b>${n}</b><span>${label}</span></div>`;
-  $('counts').innerHTML = stat(act.length, 'Buyable', 'ok') + stat(buy.length, 'Dropped', 'ok')
+    `<div class="stat ${n ? tone : 'zero'}"><b>${n}${n && tone === 'bad' ? GLYPH.failing : ''}</b><span>${label}</span></div>`;
+  $('counts').innerHTML = stat(act.length, 'Buyable', 'buy') + stat(buy.length, 'Dropped', '')
     + (news.length ? stat(news.length, 'To read', '') : '')
     + stat(held.length, 'Held', '') + stat(broken.length, 'Broken', 'bad');
   BUCKETS = bucketize([...buy, ...news]);
   const buyB = BUCKETS.filter(b => !b.announce), newsB = BUCKETS.filter(b => b.announce);
 
-  const clearBtn = ids => `<button class="btn-text" style="color:var(--dim);margin-left:14px"
-      onclick="dismissAll([${ids}])">Clear</button>`;
+  const clearBtn = ids => `<button class="btn-text" onclick="dismissAll([${ids}])">Clear</button>`;
 
-  let html = act.map(actRow).join('') + held.map(heldRow).join('') + broken.map(brokenRow).join('');
-
+  let main = '', side = '';
   if (buy.length) {
     const ids = [...new Set(buy.map(r => r.e.id))];
-    html = `<div class="group-label">Just dropped · ${buy.length}${clearBtn(ids)}</div>
-      <div>${buyB.map(bucketRow).join('')}</div>` + html;
+    main += section('Just dropped', buy.length, '', clearBtn(ids))
+      + `<div class="list">${buyB.map(bucketRow).join('')}</div>`;
   }
+  if (act.length) main += section('In stock', act.length) + act.map(actRow).join('');
+  if (held.length) main += section('Held', held.length) + held.map(heldRow).join('');
+  if (broken.length) main += section('Failing', broken.length) + broken.map(brokenRow).join('');
   if (news.length) {
     const ids = [...new Set(news.map(r => r.e.id))];
-    html += `<div class="group-label">From your feeds · ${news.length}${clearBtn(ids)}</div>
-      <div>${newsB.map(bucketRow).join('')}</div>`;
+    main += section('From your feeds', news.length, '', clearBtn(ids))
+      + `<div class="list">${newsB.map(bucketRow).join('')}</div>`;
   }
   if (waiting.length) {
-    html += `<div class="group-label">Waiting · ${waiting.length} · nothing to do</div>
-      <div>${waiting.map(waitRow).join('')}</div>`;
+    side += section('Waiting', waiting.length, ' · nothing to do')
+      + `<div class="list waiting">${waiting.map(waitRow).join('')}</div>`;
   }
   /* Somewhere new to watch, under the stores already watched. Hidden once
      you watch any part of a store, so the list shrinks as you use it. */
   const watchedHosts = new Set(WATCHES.map(w => hostOf(w.url)));
   const fresh = SUGGESTED.filter(x => !watchedHosts.has(hostOf(x.url)));
   if (fresh.length && WATCHES.length) {
-    html += `<div class="group-label">Stores you might watch · ${fresh.length}</div>
-      <div>${fresh.map(suggRow).join('')}</div>`;
+    side += section('Stores you might watch', fresh.length)
+      + `<div class="list">${fresh.map(suggRow).join('')}</div>`;
   }
   /* Anything already listed above as actionable is not repeated here. Showing
      each event twice is precisely the clutter this section was accused of. */
   const shown = new Set(fired.map(e => e.id));
   const history = EVENTS.filter(e => !shown.has(e.id));
   if (history.length) {
-    html += `<div class="group-label">Recent alerts · ${history.length}
-      <button class="btn-text" style="color:var(--dim);margin-left:14px"
-        onclick="clearFeed()">Clear all</button></div>
-      <div>${history.slice(0, 25).map(feedRow).join('')}</div>`;
+    side += section('Recent alerts', history.length, '',
+        `<button class="btn-text" onclick="clearFeed()">Clear all</button>`)
+      + `<div class="list">${history.slice(0, 25).map(feedRow).join('')}</div>`;
   }
+
+  let html;
   if (!WATCHES.length) {
-    html = `<div class="empty">Nothing watched yet. Add one — a product URL for a
-      restock, a store URL for new drops, or a feed URL for something not announced.</div>`;
+    html = `<div class="group-label"><h2>Get started</h2></div>
+      <div class="empty">Nothing watched yet. Add one — a product URL for a
+      restock, a store URL for new drops, or a feed URL for something not announced.
+      <div><button class="btn-quiet" onclick="openAdd()">Add a watch</button></div></div>`;
+  } else if (!main) {
+    /* Nothing to act on: one column, so Waiting sits right under the header. */
+    html = `<div class="one-col">${side}</div>`;
+  } else {
+    html = `<div class="cols"><div class="col-main">${main}</div>`
+         + `<aside class="col-side">${side}</aside></div>`;
   }
   $('sheet').innerHTML = html;
+  stickSide();
   if (OPEN_BUCKET !== null && $('add').querySelector('.bucket-sheet')
       && !$('add').classList.contains('hide')) renderBucket(false);
 }
+
+function stickSide() {
+  const s = document.querySelector('.col-side');
+  if (s) s.classList.toggle('stick', s.offsetHeight < window.innerHeight);
+}
+window.addEventListener('resize', stickSide);
 
 /* ---------- suggestions ---------- */
 
@@ -1210,9 +1325,9 @@ function suggRow(x) {
     <span class="sn"><span class="k">${esc(x.city)}</span>${esc(x.name)}</span>
     <span class="sb">${carried ? carried + ' in stock now' : esc(x.note || '')}</span>
     <span class="sa">
-      ${x.sale_url ? `<button class="chip mini" data-url="${esc(x.sale_url)}" data-v="${esc(JSON.stringify(x.vendors || []))}"
+      ${x.sale_url ? `<button class="chip mini btn-quiet" data-url="${esc(x.sale_url)}" data-v="${esc(JSON.stringify(x.vendors || []))}"
         onclick="watchSuggested(this.dataset.url, JSON.parse(this.dataset.v))">Watch sale</button>` : ''}
-      <button class="chip mini" data-url="${esc(x.url)}" data-v="${esc(JSON.stringify(x.vendors || []))}"
+      <button class="chip mini btn-quiet" data-url="${esc(x.url)}" data-v="${esc(JSON.stringify(x.vendors || []))}"
         onclick="watchSuggested(this.dataset.url, JSON.parse(this.dataset.v))">Watch new</button>
     </span>
   </div>`;
@@ -1277,22 +1392,22 @@ async function detail(id) {
   const w = d.watch, st = derive(w);
   $('add').innerHTML = `<div class="sheet">
     <h2>${esc(w.last_title || w.name)}</h2>
-    <p class="sub"><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.url)}</a></p>
-    <div style="font-size:13px;display:flex;flex-direction:column;gap:8px">
+    <p class="sub mono"><a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:var(--text-dim)">${esc(w.url)}</a></p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:24px">
       <div>${eyebrowFor(st, 'every ' + every(w))}</div>
       ${w.size_pref ? `<div class="meta">Watching size <b>${esc(w.size_pref.toUpperCase())}</b></div>` : ''}
-      ${w.last_error ? `<div class="mono" style="color:var(--failing)">${esc(w.last_error)}</div>` : ''}
+      ${w.last_error ? `<div class="mono" style="font-size:13px;color:var(--failing);overflow-wrap:anywhere">${esc(w.last_error)}</div>` : ''}
     </div>
-    <div class="group-label">Last ${d.checks.length} checks</div>
-    <div style="max-height:300px;overflow-y:auto">
-      ${d.checks.map(c => `<div class="wait" style="grid-template-columns:90px 46px 56px 1fr">
-        <span class="t" style="text-align:left">${esc(ago(c.checked_at))}</span>
-        <span class="s" style="color:${c.ok ? 'var(--in-stock)' : 'var(--failing)'}">${c.ok ? 'ok' : 'fail'}</span>
-        <span class="s mono">${c.http_status == null ? '—' : c.http_status}</span>
-        <span class="t mono" style="text-align:left">${esc((c.error || c.state || '').slice(0, 44))}</span>
-      </div>`).join('') || '<div class="empty" style="padding:20px 0">No checks yet.</div>'}
+    <div class="group-label"><h2>Last ${d.checks.length} checks</h2></div>
+    <div class="list">
+      ${d.checks.map(c => `<div class="check">
+        <span class="ct">${esc(ago(c.checked_at))}</span>
+        <span class="cr" style="color:${c.ok ? 'var(--in-stock)' : 'var(--failing)'}">${c.ok ? GLYPH.in_stock + 'ok' : GLYPH.failing + 'fail'}</span>
+        <span class="cs">${c.http_status == null ? '—' : c.http_status}</span>
+        <span class="ce" title="${esc(c.error || c.state || '')}">${esc(c.error || c.state || '')}</span>
+      </div>`).join('') || '<div class="empty">No checks yet.</div>'}
     </div>
-    <div class="sheet-actions"><button class="btn-ghost" onclick="closeSheet()">Close</button></div>
+    <div class="sheet-actions"><button class="btn-quiet" onclick="closeSheet()">Close</button></div>
   </div>`;
   showSheet();
 }
@@ -1307,25 +1422,25 @@ async function edit(id) {
     <h2>Edit watch</h2>
     <p class="sub">${esc(w.brand || '')} · ${esc(w.last_title || w.name)}</p>
 
-    <div class="field" style="margin-top:0">
+    <div class="field">
       <label>Name</label>
       <input type="text" id="eName" value="${esc(w.name)}">
     </div>
 
     <div class="field">
-      <label>Url <span style="color:var(--dim)">${esc(w.strategy)} · ${esc(w.kind)}</span></label>
+      <label>URL <span class="hint">${esc(w.strategy)} · ${esc(w.kind)}</span></label>
       <input type="url" id="eUrl" value="${esc(w.url)}">
     </div>
 
     ${feedWatch ? `<div class="field">
-      <label>Keywords <span style="color:var(--dim)">a, b = either · a + b = both</span></label>
+      <label>Keywords <span class="hint">a, b = either · a + b = both</span></label>
       <input type="text" id="eKw" value="${esc(w.target_ref || '')}">
-      <div class="warn">On a busy feed, prefer <b>+</b>. One broad term matches
+      <div class="warn note">On a busy feed, prefer <b>+</b>. One broad term matches
         nearly everything and the alerts become noise you learn to ignore.</div>
     </div>` : `<div class="field">
-      <label>Size preference <span style="color:var(--dim)">blank = any size</span></label>
+      <label>Size preference <span class="hint">blank = any size</span></label>
       <input type="text" id="eSize" value="${esc(w.size_pref || '')}" placeholder="m, l">
-      <div class="warn">Naming a size silences every other size — the list will
+      <div class="warn note">Naming a size silences every other size — the list will
         label it <b>held, not your size</b> rather than going quiet unexplained.</div>
     </div>`}
 
@@ -1341,14 +1456,14 @@ async function edit(id) {
     <div id="eWarn"></div>
 
     <div class="sheet-actions">
-      <button class="btn-accent" id="eSave" onclick="saveEdit(${id})">Save changes</button>
-      <button class="btn-text" style="color:var(--muted)" onclick="closeSheet()">Cancel</button>
-      <button class="btn-text" style="color:var(--muted)"
+      <button class="btn-quiet strong" id="eSave" onclick="saveEdit(${id})">Save changes</button>
+      <button class="btn-text" onclick="closeSheet()">Cancel</button>
+      <button class="btn-text"
         onclick="togglePause(${id},${w.paused ? 1 : 0}).then(closeSheet)">
         ${w.paused ? 'Resume watching' : 'Pause watching'}</button>
-      <button class="btn-text" style="color:var(--failing);margin-left:auto"
+      <button class="btn-text danger" style="margin-left:auto"
         onclick="removeWatch(${id})">Delete</button>
-      <span id="eErr" style="font-size:12px;color:var(--failing)"></span>
+      <span id="eErr" class="err-line"></span>
     </div>
   </div>`;
   showSheet();
@@ -1423,31 +1538,31 @@ function openAdd() {
     <p class="sub">Three different questions. Pick the one you'd actually ask out loud.</p>
     <div id="intents">${INTENTS.map(i => `
       <button class="intent" aria-pressed="${i.id === INTENT}" onclick="pickIntent('${i.id}')">
-        <span style="color:${i.id === INTENT ? 'var(--accent)' : 'var(--muted)'};display:inline-flex">
-          ${i.id === INTENT ? GLYPH.in_stock : GLYPH.out_of_stock}</span>
+        <span style="color:${i.id === INTENT ? 'var(--bright)' : 'var(--muted)'};display:inline-flex">
+          ${i.id === INTENT ? ICON.radioOn : ICON.radio}</span>
         <span class="q">${esc(i.q)}</span>
         <span class="ex">${esc(i.ex)}</span>
       </button>`).join('')}</div>
 
     <div class="field">
-      <label>Url <span style="color:var(--dim)">paste it, we'll identify it</span></label>
+      <label>URL <span class="hint">paste it, we'll identify it</span></label>
       <input type="url" id="aUrl" placeholder="${esc(INTENTS[0].ph)}">
     </div>
     <div id="detect"></div>
 
     <div id="kwField" class="field hide">
-      <label>Keywords <span style="color:var(--dim)">a, b = either · a + b = both</span></label>
+      <label>Keywords <span class="hint">a, b = either · a + b = both</span></label>
       <input type="text" id="aKw" placeholder="zelda + ocarina">
-      <div class="warn">On a busy feed, prefer <b>+</b>. A single broad term like
+      <div class="warn note">On a busy feed, prefer <b>+</b>. A single broad term like
         <b>switch 2</b> on a Switch&nbsp;2 news site matches nearly every article,
         and you'll get an alert an hour. <b>zelda + ocarina</b> fires only when
         both words appear.</div>
     </div>
 
     <div id="sizeField" class="field">
-      <label>Size preference · optional <span style="color:var(--dim)">most wanted first</span></label>
+      <label>Size preference · optional <span class="hint">most wanted first</span></label>
       <input type="text" id="aSize" placeholder="m, l">
-      <div class="warn">Naming a size silences every other size. If L comes back and M
+      <div class="warn note">Naming a size silences every other size. If L comes back and M
         doesn't, this watch stays quiet on purpose — the list will label it
         <b>held, not your size</b>, so silence never looks like breakage.
         Leave blank to be alerted on any size.</div>
@@ -1460,13 +1575,13 @@ function openAdd() {
         <button aria-pressed="true"  data-tier="base">5m</button>
         <button aria-pressed="false" data-tier="slow">15m</button>
       </div>
-      <span style="font-size:11px;color:var(--dim)">Arm it later to drop to 45s when a drop is imminent.</span>
+      <span class="aside">Arm it later to drop to 45s when a drop is imminent.</span>
     </div>
 
     <div class="sheet-actions">
-      <button class="btn-accent" id="saveBtn" onclick="saveWatch()">Start watching</button>
-      <button class="btn-text" style="color:var(--muted)" onclick="closeSheet()">Cancel</button>
-      <span id="addErr" style="font-size:12px;color:var(--failing)"></span>
+      <button class="btn-quiet strong" id="saveBtn" onclick="saveWatch()">Start watching</button>
+      <button class="btn-text" onclick="closeSheet()">Cancel</button>
+      <span id="addErr" class="err-line"></span>
     </div>
   </div>`;
   showSheet();
@@ -1485,12 +1600,12 @@ function openInspect() {
     <p class="sub">Paste a product URL. I'll tell you what the monitor can see,
       and what it would do about it.</p>
     <div class="field">
-      <label>Product url</label>
+      <label>Product URL</label>
       <input type="url" id="iUrl" placeholder="https://www.satisfyrunning.com/products/...">
     </div>
     <div id="iOut"></div>
     <div class="sheet-actions">
-      <button class="btn" onclick="runInspect()">Look</button>
+      <button class="btn-quiet strong" onclick="runInspect()">Look</button>
       <button class="btn-text" onclick="closeSheet()">Close</button>
     </div>
   </div>`;
@@ -1502,7 +1617,7 @@ function openInspect() {
 async function runInspect() {
   const url = ($('iUrl').value || '').trim();
   if (!url) return;
-  $('iOut').innerHTML = '<p class="sub">Asking the store…</p>';
+  $('iOut').innerHTML = '<p class="sub" style="margin-top:16px">Asking the store…</p>';
   let d;
   try {
     d = await api('/inspect?url=' + encodeURIComponent(url));
@@ -1519,25 +1634,27 @@ async function runInspect() {
       <span class="fi">
         <span class="k">${esc(w.name)}${w.in_feed === false
           ? '<span class="tag" title="This collection does not contain the product">not covered</span>' : ''}</span>
-        ${esc(w.verdict)}
+        <span style="font-weight:400">${esc(w.verdict)}</span>
       </span>
       <span class="ft">swept ${esc(when(w.last_sweep_at))}</span>
     </div>`).join('');
   /* Three sources, each reported as what it said — including when it said
      nothing. Collapsing them into one word is what produced "Buyable now"
      about a product the storefront was showing as Coming Soon. */
-  const says = v => v === true ? 'buyable'
-              : v === false ? 'not buyable'
-              : 'did not say';
+  const says = v => v === true
+    ? `<span class="v" style="color:var(--in-stock)">${GLYPH.in_stock}Buyable</span>`
+    : v === false
+    ? `<span class="v" style="color:var(--muted)">${GLYPH.out_of_stock}Not buyable</span>`
+    : `<span class="v" style="color:var(--no-baseline)">${GLYPH.unknown}Did not say</span>`;
   const src = d.sources || {};
   const srcRow = (label, v, note) => `
     <div class="fired">
-      <span class="fi"><span class="k">${esc(label)}</span>${esc(says(v))}</span>
+      <span class="fi"><span class="k">${esc(label)}</span>${says(v)}</span>
       <span class="ft">${esc(note || '')}</span>
     </div>`;
 
   $('iOut').innerHTML = `
-    <p class="sub"><b>${esc(d.title || d.handle)}</b><br>
+    <p class="sub" style="margin-top:16px"><b>${esc(d.title || d.handle)}</b><br>
       ${d.buyable_now === null || d.buyable_now === undefined
         ? 'Nothing we read stated whether it is buyable'
         : (d.buyable_now ? 'The catalogue says buyable' : 'The catalogue says not buyable')}
@@ -1556,18 +1673,26 @@ async function runInspect() {
     ${rows || ''}
     ${(d.alerts || []).length ? `<div class="fired">
         <span class="fi"><span class="k">Already sent about this</span>
-        ${d.alerts.map(a => esc(`${a.arrival || a.kind} · ${when(a.at)}`)).join('<br>')}
+        <span class="lines">${d.alerts.map(a => esc(`${a.arrival || a.kind} · ${when(a.at)}`)).join('<br>')}</span>
         </span></div>` : ''}
     ${d.note ? `<div class="warn">${esc(d.note)}</div>` : ''}
     ${(!rows && !d.note) ? `<div class="warn">Nothing is watching this store.</div>` : ''}`;
 }
 
+/* The sheet rises in 200ms from a synchronous start — a forced reflow, not a
+   requestAnimationFrame — so it has landed well inside ui-check's 250ms look.
+   Closing is instant. */
 function showSheet() {
-  $('add').classList.remove('hide');
+  const o = $('add');
+  o.classList.remove('hide');
   document.body.classList.add('locked');
+  void o.offsetWidth;
+  o.classList.add('open');
 }
 function closeSheet() {
-  $('add').classList.add('hide');
+  const o = $('add');
+  o.classList.remove('open');
+  o.classList.add('hide');
   document.body.classList.remove('locked');
   OPEN_BUCKET = null;
   OPEN_SIG = '';
@@ -1578,8 +1703,8 @@ function pickIntent(id) {
   document.querySelectorAll('#intents .intent').forEach((b, i) => {
     const on = INTENTS[i].id === id;
     b.setAttribute('aria-pressed', on);
-    b.firstElementChild.style.color = on ? 'var(--accent)' : 'var(--muted)';
-    b.firstElementChild.innerHTML = on ? GLYPH.in_stock : GLYPH.out_of_stock;
+    b.firstElementChild.style.color = on ? 'var(--bright)' : 'var(--muted)';
+    b.firstElementChild.innerHTML = on ? ICON.radioOn : ICON.radio;
   });
   /* No field appears that the chosen intent doesn't use. */
   $('sizeField').classList.toggle('hide', id !== 'restock');
@@ -1590,21 +1715,20 @@ function pickIntent(id) {
 async function detect() {
   const url = $('aUrl').value.trim();
   if (!url) return;
-  $('detect').innerHTML = '<div class="detect" style="color:var(--held);border-color:var(--field-edge)">Identifying…</div>';
+  $('detect').innerHTML = '<div class="detect">Identifying…</div>';
   try {
     const d = await api('/detect', {method: 'POST', body: JSON.stringify({url})});
     const vs = d.variants || [];
     const named = vs.map(v => v.title).filter(t => t && !/^default/i.test(t));
-    $('detect').innerHTML = `<div class="detect">
-      <span style="color:var(--in-stock);display:inline-flex">${GLYPH.in_stock}</span>
+    $('detect').innerHTML = `<div class="detect">${GLYPH.in_stock}<div>
       ${esc(d.strategy)} · <b>${esc(d.brand || '')}</b> · ${esc(d.name || '')}
       <div class="l2">${named.length > 1
         ? esc(named.length + ' size variants found — ' + named.join(', ')) + '. Cart permalink available per size.'
-        : 'One variant. No size field needed — there is nothing to choose.'}</div></div>`;
+        : 'One variant. No size field needed — there is nothing to choose.'}</div></div></div>`;
     if (named.length <= 1) $('sizeField').classList.add('hide');
     else if (INTENT === 'restock') $('sizeField').classList.remove('hide');
   } catch (e) {
-    $('detect').innerHTML = '<div class="detect bad">' + esc(e.message) + '</div>';
+    $('detect').innerHTML = `<div class="detect bad">${GLYPH.failing}<div>${esc(e.message)}</div></div>`;
   }
 }
 
@@ -1661,8 +1785,6 @@ async function start() {
     if (!mark) {
       mark = document.createElement('div');
       mark.id = 'build';
-      mark.className = 'caption';
-      mark.style.cssText = 'padding:24px 0 8px;color:var(--dim);font-size:10px;letter-spacing:.14em';
       document.querySelector('.body').appendChild(mark);
     }
     mark.textContent = 'BUILD ' + me.build;

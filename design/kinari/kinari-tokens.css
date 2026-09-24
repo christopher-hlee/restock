@@ -1,0 +1,55 @@
+/* Kinari — Restock design tokens.
+   Replace the two token blocks at the top of <style> in monitor/static/index.html
+   (":root{…}" and ":root[data-theme="light"]{…}") with everything in this file.
+   Dark stays the default (no attribute); light is data-theme="light". */
+
+/* sumi — dark (default) */
+:root{
+  --ground:#171513; --surface:#211E1B; --surface-quiet:#1C1A17;
+  --rule:#3A342D; --border:#7A7063; --rule-faint:#2A2622;
+  --bright:#F2EBDF; --text:#DDD5C8; --text-dim:#ADA497; --muted:#948B7E;
+  --accent:#E2553B; --accent-ink:#170A06;
+  --in-stock:#8FC27A; --failing:#E88AAE; --armed:#D9A441; --no-baseline:#7FB0D6;
+  --photo-bg:#26221E; --photo-blend:normal; --photo-edge:#2A2622;
+  --focus:#7FB0D6; --scrim:rgb(0 0 0 / .6);
+  --tint-in-stock:#1C2219; --tint-failing:#251A1F;
+  color-scheme:dark;
+}
+
+/* washi — light */
+:root[data-theme="light"]{
+  --ground:#F4EFE6; --surface:#EAE3D6; --surface-quiet:#EFE9DE;
+  --rule:#D8CFBF; --border:#8C8173; --rule-faint:#E4DCCD;
+  --bright:#1C1A17; --text:#2E2A25; --text-dim:#5E564C; --muted:#6F665A;
+  --accent:#B8321E; --accent-ink:#FFFFFF;
+  --in-stock:#3E6B2E; --failing:#9B2D5A; --armed:#8A5A00; --no-baseline:#1F5E86;
+  --photo-bg:#E6DED0; --photo-blend:multiply; --photo-edge:transparent;
+  --focus:#1F5E86; --scrim:rgb(28 26 23 / .45);
+  --tint-in-stock:#E9EDDF; --tint-failing:#F3E3E8;
+  color-scheme:light;
+}
+
+/* Mode-independent */
+:root{
+  --serif:"Newsreader","Iowan Old Style","Hiragino Mincho ProN","Yu Mincho","Noto Serif",Georgia,serif;
+  --sans:"Hanken Grotesk",-apple-system,"Hiragino Sans","Yu Gothic",Roboto,"Noto Sans JP",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,"Roboto Mono",monospace;
+  --gutter:16px; --bleed:16px;
+
+  /* Legacy names: every inline var(--…) in the JS templates keeps resolving.
+     Delete each alias once nothing references it. */
+  --held:var(--text-dim);
+  --dim:var(--muted); --faint:var(--muted);
+  --accent-hover:var(--accent);
+  --surface-held:var(--surface-quiet); --pressed:var(--surface-quiet); --warn-bg:var(--surface-quiet);
+  --chip-hover:var(--surface);
+  --field-edge:var(--border);
+  --hatch-a:var(--photo-bg); --hatch-b:var(--photo-bg);
+  --broken-a:var(--photo-bg); --broken-b:var(--photo-bg);
+  --wash-ok:var(--tint-in-stock); --wash-bad:var(--tint-failing);
+  --warn-ink:var(--text); --held-name:var(--text);
+  --ok-edge:var(--rule); --held-edge:var(--rule);
+  --bad-edge:var(--failing); --toast-bad:var(--failing); --toast-good:var(--bright);
+}
+@media (min-width:600px){:root{--gutter:32px}}
+@media (min-width:1200px){:root{--gutter:48px}}

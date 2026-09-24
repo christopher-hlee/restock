@@ -157,6 +157,38 @@ ROW_LIMITS = {".wait": MAX_ROW_HEIGHT, ".fired": MAX_ROW_HEIGHT, ".sugg": 200,
               ".bucket": 170, ".feed": 160, ".row": 420}
 
 
+# Kinari's two hardest rules, measured on the rendered page rather than trusted
+# to the stylesheet: the accent colour is only ever the fill of something you
+# buy with, and nothing but the header's date line is set in capitals.
+ONE_FILL = """() => {
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--accent)';
+    document.body.appendChild(probe);
+    const accent = getComputedStyle(probe).color;
+    probe.remove();
+    const out = [];
+    for (const e of document.querySelectorAll('body *')) {
+        const r = e.getBoundingClientRect();
+        if (!r.width || !r.height) continue;
+        const cs = getComputedStyle(e);
+        if (cs.backgroundColor === accent && !e.matches('.btn-buy, .stat.buy'))
+            out.push('filled: ' + (e.className || e.tagName));
+        if (cs.color === accent && (e.textContent || '').trim())
+            out.push('accent text: ' + (e.className || e.tagName));
+        if (cs.borderTopColor === accent && cs.borderTopStyle !== 'none'
+                && parseFloat(cs.borderTopWidth) > 0 && !e.matches('.btn-buy'))
+            out.push('accent border: ' + (e.className || e.tagName));
+    }
+    return [...new Set(out)];
+}"""
+
+NO_CAPS = """() => [...document.querySelectorAll('body *')]
+    .filter(e => e.id !== 'eyebrow' && e.getBoundingClientRect().width
+              && getComputedStyle(e).textTransform === 'uppercase'
+              && (e.textContent || '').trim())
+    .map(e => e.className || e.tagName)"""
+
+
 # A skip is a lie when someone is relying on the answer. Locally, no browser
 # means "cannot check"; in CI it means the check did not happen while the job
 # went green — which is the failure this whole file exists to catch, committed
@@ -248,6 +280,14 @@ def main() -> int:
                         fail(f"{selector} row is {height}px tall — wrapping badly")
 
             no_junk("body")
+
+            for where in page.evaluate(ONE_FILL):
+                fail(f"accent used for something other than buying — {where}")
+            caps = page.evaluate(NO_CAPS)
+            if caps:
+                fail(f"text in capitals outside the date line: {sorted(set(caps))[:5]}")
+            if not page.locator(".row.broken").locator("text=Details").count():
+                fail("the Failing row has no Details button")
 
             # Drops are grouped: one row per watch, never one per product.
             buckets = page.locator(".bucket").count()
@@ -423,24 +463,31 @@ def main() -> int:
                     " e.scrollWidth > e.clientWidth + 1).map(e => e.textContent.trim())")
                 if cramped:
                     fail(f"dock labels do not fit: {cramped}")
+                dark_ground = page.evaluate("getComputedStyle(document.body).backgroundColor")
                 toggle.click()
                 page.wait_for_timeout(200)
                 theme = page.evaluate("document.documentElement.dataset.theme || 'dark'")
                 ground = page.evaluate("getComputedStyle(document.body).backgroundColor")
-                if theme != "light" or ground == "rgb(16, 15, 13)":
+                if theme != "light" or ground == dark_ground:
                     fail(f"the toggle did not switch to light ({theme}, {ground})")
                 # Every text a person reads against the page must stay legible.
                 weak = page.evaluate("""() => {
                     const lum = c => { const [r,g,b] = c.match(/\\d+(\\.\\d+)?/g).slice(0,3).map(Number)
                         .map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; });
                         return .2126*r + .7152*g + .0722*b; };
-                    const bg = lum(getComputedStyle(document.body).backgroundColor);
+                    const bgOf = e => {
+                        for (let n = e; n; n = n.parentElement) {
+                            const c = getComputedStyle(n).backgroundColor;
+                            if (!/rgba\\(.*,\\s*0\\)$/.test(c)) return c;
+                        }
+                        return getComputedStyle(document.body).backgroundColor;
+                    };
                     const out = [];
                     for (const sel of ['.hdr h1', '.stat span', '.group-label', '.bk-name',
                                        '.bk-meta', '.wait .n', '.wait .s', '.meta', '.name']) {
                         const e = document.querySelector(sel);
                         if (!e) continue;
-                        const f = lum(getComputedStyle(e).color);
+                        const f = lum(getComputedStyle(e).color), bg = lum(bgOf(e));
                         const ratio = (Math.max(f, bg) + .05) / (Math.min(f, bg) + .05);
                         if (ratio < 4.5) out.push(sel + ' ' + ratio.toFixed(1));
                     }
@@ -448,6 +495,8 @@ def main() -> int:
                 }""")
                 for w in weak:
                     fail(f"light mode text under 4.5:1 contrast: {w}")
+                for where in page.evaluate(ONE_FILL):
+                    fail(f"light mode: accent used for something other than buying — {where}")
                 overflow = page.evaluate("document.documentElement.scrollWidth"
                                          " - document.documentElement.clientWidth")
                 if overflow > 0:

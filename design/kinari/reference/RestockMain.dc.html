@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..600&amp;family=Geist+Mono:wght@400..500&amp;family=Hanken+Grotesk:wght@400..600&amp;family=Instrument+Sans:wdth,wght@100,400..600&amp;family=Instrument+Serif&amp;family=Inter:opsz,wght@14..32,400..600&amp;family=Newsreader:opsz,wght@6..72,400..500&amp;display=swap" rel="stylesheet">
+<style>@keyframes rs-tick{50%{opacity:0}}</style>
+</helmet>
+<div style="position:relative; min-height:100%; display:flex; flex-direction:column; background:var(--ground); color:var(--text); font-family:var(--f-ui); font-size:15px; line-height:1.45; font-feature-settings:var(--ff); -webkit-font-smoothing:antialiased; text-wrap:pretty">
+  <div style="flex:1; width:100%; max-width:1216px; margin:0 auto; padding:0 var(--gutter,16px); box-sizing:border-box">
+
+    <header style="padding-top:var(--hdr-pt,24px); display:flex; flex-direction:column; gap:10px">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:20px">
+        <div style="font-size:12px; font-weight:500; line-height:1.3; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim)">Your list · Wednesday 23 September</div>
+        <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:8px">
+            <button onClick="{{ theme }}" aria-label="{{ themeLabel }}" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; padding:0; margin:0; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); cursor:pointer" style-active="background:var(--surface)">
+              <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"></path></svg></sc-if>
+              <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"></path></svg></sc-if>
+            </button>
+            <button onClick="{{ why }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 16px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Why no alert?</button>
+            <button onClick="{{ add }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 16px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Add a watch</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:18px 48px">
+        <h1 style="flex:1 1 300px; min-width:0; margin:0; font-family:var(--f-display); font-size:var(--h1,28px); font-weight:var(--h1-w); letter-spacing:var(--h1-track); line-height:var(--h1-lh); color:var(--bright); text-wrap:balance">{{ headline }}</h1>
+        <div style="flex:1 1 330px; max-width:var(--stats-max,none); min-width:0; display:flex">
+          <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:5px; padding:10px 8px 9px; background:var(--accent); color:var(--accent-ink)">
+            <b style="font-family:var(--f-data); font-size:24px; font-weight:500; line-height:1; font-variant-numeric:tabular-nums lining-nums">1</b>
+            <span style="font-size:13px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">Buyable</span>
+          </div>
+          <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:5px; padding:10px 8px 9px; border-left:1px solid var(--rule)">
+            <b style="font-family:var(--f-data); font-size:24px; font-weight:500; line-height:1; color:var(--bright); font-variant-numeric:tabular-nums lining-nums">{{ droppedN }}</b>
+            <span style="font-size:13px; line-height:1.2; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">Dropped</span>
+          </div>
+          <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:5px; padding:10px 8px 9px; border-left:1px solid var(--rule)">
+            <b style="font-family:var(--f-data); font-size:24px; font-weight:500; line-height:1; color:var(--bright); font-variant-numeric:tabular-nums lining-nums">{{ feedN }}</b>
+            <span style="font-size:13px; line-height:1.2; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">To read</span>
+          </div>
+          <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:5px; padding:10px 8px 9px; border-left:1px solid var(--rule)">
+            <b style="font-family:var(--f-data); font-size:24px; font-weight:500; line-height:1; color:var(--bright); font-variant-numeric:tabular-nums lining-nums">1</b>
+            <span style="font-size:13px; line-height:1.2; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">Held</span>
+          </div>
+          <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:5px; padding:10px 8px 9px; border-left:1px solid var(--rule)">
+            <b style="display:inline-flex; align-items:center; gap:6px; font-family:var(--f-data); font-size:24px; font-weight:500; line-height:1; color:var(--bright); font-variant-numeric:tabular-nums lining-nums">1<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" style="flex:none; color:var(--failing)"><path d="M6 1.3 10.9 10.4H1.1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6 4.8v2.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg></b>
+            <span style="font-size:13px; line-height:1.2; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">Broken</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div style="display:flex; flex-wrap:wrap; align-items:flex-start; column-gap:48px">
+      <main style="flex:1 1 560px; min-width:0; max-width:var(--main-max,none)">
+
+        <sc-if value="{{ hasDrops }}" hint-placeholder-val="{{ true }}">
+          <section>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+              <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">Just dropped</h2>
+              <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">· {{ droppedN }}</span>
+              <button onClick="{{ clearDrops }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:-6px -8px -6px auto; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer">Clear</button>
+            </div>
+            <div style="margin-top:8px">
+              <sc-for list="{{ drops }}" as="d" hint-placeholder-count="3">
+                <button onClick="{{ d.open }}" style="display:flex; align-items:center; gap:16px; width:100%; min-height:88px; padding:14px 0; margin:0; box-sizing:border-box; background:none; border:0; border-top:1px solid var(--rule-faint); color:inherit; font:inherit; text-align:left; cursor:pointer" style-active="background:var(--surface-quiet)">
+                  <span style="position:relative; flex:none; width:132px; height:56px">
+                    <span style="position:absolute; left:0; top:0; z-index:3; width:56px; height:56px; background:var(--photo-bg); box-shadow:0 0 0 2px var(--ground)"></span>
+                    <sc-if value="{{ d.p2 }}" hint-placeholder-val="{{ true }}"><span style="position:absolute; left:36px; top:0; z-index:2; width:56px; height:56px; background:var(--photo-bg); box-shadow:0 0 0 2px var(--ground)"></span></sc-if>
+                    <sc-if value="{{ d.p3 }}" hint-placeholder-val="{{ true }}"><span style="position:absolute; left:72px; top:0; z-index:1; width:56px; height:56px; background:var(--photo-bg); box-shadow:0 0 0 2px var(--ground)"></span></sc-if>
+                  </span>
+                  <span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px">
+                    <span style="font-size:13px; line-height:1.3; color:var(--text-dim)">{{ d.store }}</span>
+                    <span style="font-family:var(--f-name); font-size:17px; font-weight:var(--name-w); line-height:1.25; color:var(--bright); overflow-wrap:anywhere">{{ d.name }}</span>
+                    <span style="font-family:var(--f-data); font-size:13px; line-height:1.35; color:var(--text); font-variant-numeric:tabular-nums">{{ d.count }}<span style="color:var(--text-dim)">{{ d.whenLabel }}</span></span>
+                  </span>
+                  <sc-if value="{{ d.starred }}" hint-placeholder-val="{{ false }}">
+                    <span style="flex:none; display:inline-flex; align-items:center; gap:4px; color:var(--bright); font-family:var(--f-data); font-size:13px; font-weight:600; font-variant-numeric:tabular-nums"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6 .9 7.5 4.1l3.5.4-2.6 2.4.7 3.5L6 8.7l-3.1 1.7.7-3.5L1 4.5l3.5-.4z" fill="currentColor"></path></svg>{{ d.stars }}</span>
+                  </sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+
+        <section>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+            <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">In stock</h2>
+            <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">· 1</span>
+          </div>
+          <div style="margin:12px calc(-1 * var(--bleed,16px)) 0; padding:16px var(--bleed,16px) 12px calc(var(--bleed,16px) - var(--edge-in,0px)); background:var(--tint-in-stock); border-left:var(--edge-in,0px) solid var(--in-stock); display:flex; flex-direction:column; gap:12px">
+            <div style="display:flex; gap:14px; align-items:flex-start">
+              <div style="flex:none; width:96px; height:96px; background:var(--photo-bg); box-shadow:var(--photo-ring); display:flex; align-items:flex-end; padding:6px; box-sizing:border-box; font-family:var(--f-mono); font-size:10px; line-height:1; color:var(--muted)">photo</div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+                <div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; line-height:1.35; color:var(--in-stock)"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" style="flex:none"><circle cx="6" cy="6" r="4.5" fill="currentColor"></circle></svg><span>In stock · your size <span style="font-family:var(--f-data); font-weight:400; color:var(--muted); font-variant-numeric:tabular-nums">· 12s ago</span></span></div>
+                <div style="font-size:13px; line-height:1.35; color:var(--text-dim)">Haven</div>
+                <div style="font-family:var(--f-name); font-size:var(--name-size); font-weight:var(--name-w); line-height:1.25; color:var(--bright); overflow-wrap:anywhere">AURALEE Super Light Wool Shirt</div>
+                <div style="display:flex; flex-wrap:wrap; align-items:baseline; column-gap:6px; font-size:13px; color:var(--text-dim)"><span style="font-family:var(--f-data); font-size:15px; font-weight:500; color:var(--bright); font-variant-numeric:tabular-nums; white-space:nowrap">$290</span><span style="white-space:nowrap">· sizes back: M, L, XL</span></div>
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px">
+              <button onClick="{{ cartM }}" aria-label="Add size M, your size, to cart" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:56px; min-height:48px; padding:0 16px; margin:0; box-sizing:border-box; border:0; border-radius:var(--radius); background:var(--accent); color:var(--accent-ink); font-family:var(--f-buy); font-size:var(--buy-size); font-weight:var(--buy-w); line-height:1; font-variant-numeric:tabular-nums; cursor:pointer" style-active="filter:brightness(.88); transform:translateY(1px)"><svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="currentColor"></circle></svg>M<svg viewBox="0 0 14 10" width="14" height="10" aria-hidden="true"><path d="M1 5h11M8 1.2 11.8 5 8 8.8" fill="none" stroke="currentColor" stroke-width="1.5"></path></svg>cart</button>
+              <button onClick="{{ cartL }}" aria-label="Add size L to cart" style="display:inline-flex; align-items:center; justify-content:center; min-width:56px; min-height:48px; padding:0 16px; margin:0; box-sizing:border-box; border:0; border-radius:var(--radius); background:var(--accent); color:var(--accent-ink); font-family:var(--f-buy); font-size:var(--buy-size); font-weight:var(--buy-w); line-height:1; cursor:pointer" style-active="filter:brightness(.88); transform:translateY(1px)">L</button>
+              <button onClick="{{ cartXL }}" aria-label="Add size XL to cart" style="display:inline-flex; align-items:center; justify-content:center; min-width:56px; min-height:48px; padding:0 16px; margin:0; box-sizing:border-box; border:0; border-radius:var(--radius); background:var(--accent); color:var(--accent-ink); font-family:var(--f-buy); font-size:var(--buy-size); font-weight:var(--buy-w); line-height:1; cursor:pointer" style-active="filter:brightness(.88); transform:translateY(1px)">XL</button>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:-6px">
+              <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text-dim)"><svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true" style="flex:none; color:var(--bright)"><circle cx="4" cy="4" r="3.5" fill="currentColor"></circle></svg>your size · each chip is that size's cart</span>
+              <button onClick="{{ details }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:0 -8px 0 0; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer">Details</button>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+            <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">Held</h2>
+            <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">· 1</span>
+          </div>
+          <div style="display:flex; gap:14px; align-items:flex-start; padding:16px 0 4px">
+            <div style="flex:none; width:72px; height:72px; background:var(--photo-bg); box-shadow:var(--photo-ring); display:flex; align-items:flex-end; padding:5px; box-sizing:border-box; font-family:var(--f-mono); font-size:10px; line-height:1; color:var(--muted)">photo</div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+              <div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; line-height:1.35; color:var(--held)"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" style="flex:none"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M6 1.5a4.5 4.5 0 0 0 0 9z" fill="currentColor"></path></svg><span>Held · not your size <span style="font-family:var(--f-data); font-weight:400; color:var(--muted); font-variant-numeric:tabular-nums">· 2m ago</span></span></div>
+              <div style="font-size:13px; line-height:1.35; color:var(--text-dim)">Namu</div>
+              <div style="font-family:var(--f-name); font-size:var(--name-size); font-weight:var(--name-w); line-height:1.25; color:var(--text); overflow-wrap:anywhere">AURALEE Hard Twist Denim Wide Pants</div>
+              <div style="font-size:13px; line-height:1.4; color:var(--text-dim)"><span style="font-family:var(--f-data); font-variant-numeric:tabular-nums">$110</span> · in stock in L only · you watch M · nothing sent, and nothing wrong</div>
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; margin-top:8px">
+                <button onClick="{{ alsoL }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 16px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Also alert on L</button>
+                <button onClick="{{ details }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:0 -8px; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer">Details</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+            <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">Failing</h2>
+            <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">· 1</span>
+          </div>
+          <div style="margin:12px calc(-1 * var(--bleed,16px)) 0; padding:16px var(--bleed,16px) 12px calc(var(--bleed,16px) - 2px); background:var(--tint-failing); border-left:2px solid var(--failing); display:flex; gap:14px; align-items:flex-start">
+            <div style="flex:none; width:72px; height:72px; background:var(--photo-bg); box-shadow:var(--photo-ring); filter:grayscale(1); display:flex; align-items:flex-end; padding:5px; box-sizing:border-box; font-family:var(--f-mono); font-size:10px; line-height:1; color:var(--muted)">photo</div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+              <div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; line-height:1.35; color:var(--failing)"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" style="flex:none"><path d="M6 1.3 10.9 10.4H1.1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6 4.8v2.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg><span>Failing · the state shown is stale</span></div>
+              <div style="font-size:13px; line-height:1.35; color:var(--text-dim)">Haven</div>
+              <div style="font-family:var(--f-name); font-size:var(--name-size); font-weight:var(--name-w); line-height:1.25; color:var(--bright); overflow-wrap:anywhere">auralee</div>
+              <div style="font-family:var(--f-mono); font-size:13px; line-height:1.4; color:var(--failing); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden">HTTP 403 from https://havenshop.com/collections/auralee/products.json</div>
+              <div style="font-family:var(--f-data); font-size:13px; line-height:1.35; color:var(--text-dim); font-variant-numeric:tabular-nums">Failed 14× · state 2h old</div>
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px">
+                <button onClick="{{ fixUrl }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 14px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Fix URL</button>
+                <button onClick="{{ checkNow }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 14px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Check now</button>
+                <button onClick="{{ pause }}" style="display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 14px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Pause</button>
+                <button onClick="{{ details }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:0; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer">Details</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <sc-if value="{{ hasFeed }}" hint-placeholder-val="{{ true }}">
+          <section>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+              <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">From your feeds</h2>
+              <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">· 1</span>
+              <button onClick="{{ clearFeed }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:-6px -8px -6px auto; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer">Clear</button>
+            </div>
+            <button onClick="{{ openFeed }}" style="display:flex; flex-direction:column; gap:2px; width:100%; margin:8px 0 0; padding:14px 0; box-sizing:border-box; background:none; border:0; border-top:1px solid var(--rule-faint); color:inherit; font:inherit; text-align:left; cursor:pointer" style-active="background:var(--surface-quiet)">
+              <span style="font-size:13px; line-height:1.3; color:var(--text-dim)">Nintendo · news feed</span>
+              <span style="font-family:var(--f-name); font-size:17px; font-weight:var(--name-w); line-height:1.25; color:var(--bright)">zelda + ocarina</span>
+              <span style="font-family:var(--f-data); font-size:13px; line-height:1.35; color:var(--text); font-variant-numeric:tabular-nums">1 to read <span style="color:var(--text-dim)">· 22m ago</span></span>
+            </button>
+          </section>
+        </sc-if>
+      </main>
+
+      <aside style="flex:1 1 300px; min-width:0; max-width:var(--side-max,none); position:sticky; top:0">
+        <section>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+            <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">Waiting</h2>
+            <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">{{ waitingLabel }}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; margin-top:6px">
+            <sc-for list="{{ waiting }}" as="w" hint-placeholder-count="20">
+              <sc-if value="{{ w.rule }}" hint-placeholder-val="{{ false }}"><div style="height:1px; background:var(--rule-faint); margin:6px 0"></div></sc-if>
+              <div style="display:flex; flex-direction:column; padding:6px 0; min-width:0">
+                <div style="line-height:20px; min-width:0; overflow-wrap:anywhere"><span style="font-size:13px; color:var(--text-dim); margin-right:8px">{{ w.store }}</span><span style="font-size:15px; color:var(--text)">{{ w.name }}</span><span style="font-size:13px; color:var(--muted)">{{ w.size }}</span></div>
+                <div style="display:flex; align-items:flex-start; gap:12px; line-height:20px">
+                  <span style="flex:1; min-width:0; display:flex; align-items:flex-start; gap:6px; font-size:13px; font-weight:500; color:{{ w.ink }}">
+                    <sc-if value="{{ w.armed }}" hint-placeholder-val="{{ false }}">{{ armedGlyph }}</sc-if>
+                    <sc-if value="{{ w.plain }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" style="flex:none; margin-top:4px"><path d="{{ w.gs }}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="{{ w.dash }}"></path><path d="{{ w.gf }}" fill="currentColor"></path></svg></sc-if>
+                    <span style="min-width:0">{{ w.status }}</span>
+                  </span>
+                  <span style="flex:none; font-family:var(--f-data); font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap">{{ w.time }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <sc-if value="{{ hasAlerts }}" hint-placeholder-val="{{ true }}">
+          <section>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:32px; padding-top:12px; border-top:1px solid var(--rule); min-height:32px">
+              <h2 style="margin:0; font-family:var(--f-sec); font-size:var(--sec-size); font-weight:var(--sec-w); line-height:1.2; color:var(--bright); text-decoration-line:var(--sec-line); text-decoration-thickness:2px; text-underline-offset:6px">Recent alerts</h2>
+              <span style="font-family:var(--f-data); font-size:15px; color:var(--text-dim); font-variant-numeric:tabular-nums">· {{ alertsN }}</span>
+              <button onClick="{{ clearAlerts }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 8px; margin:-6px -8px -6px auto; background:none; border:0; color:var(--text); font-family:var(--f-ui); font-size:14px; font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer">Clear all</button>
+            </div>
+            <div style="display:flex; flex-direction:column; margin-top:4px">
+              <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="5">
+                <div style="display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:20px">
+                  <span style="flex:none; width:54px; padding-top:12px; font-family:var(--f-data); font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap">{{ a.t }}</span>
+                  <span style="flex:1; min-width:0; padding-top:12px; overflow-wrap:anywhere"><span style="color:var(--bright); font-weight:500">{{ a.kind }}</span><span style="color:var(--text-dim)">{{ a.rest }}</span></span>
+                  <button onClick="{{ a.x }}" aria-label="Dismiss" style="display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; margin:0 -14px 0 0; padding:0; background:none; border:0; color:var(--muted); cursor:pointer"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5"></path></svg></button>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+      </aside>
+    </div>
+
+    <div style="padding:40px 0 24px; font-family:var(--f-mono); font-size:12px; line-height:1; color:var(--muted)">BUILD 6410bff</div>
+  </div>
+
+  <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+    <nav aria-label="Actions" style="position:sticky; bottom:0; z-index:5; display:flex; gap:8px; padding:12px var(--gutter,16px) calc(12px + env(safe-area-inset-bottom)); background:var(--dock-bg); border-top:1px solid var(--rule); box-shadow:var(--elev-dock)">
+      <button onClick="{{ theme }}" aria-label="{{ themeLabel }}" style="flex:none; display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; padding:0; margin:0; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); cursor:pointer" style-active="background:var(--surface)">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"></path></svg></sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"></path></svg></sc-if>
+      </button>
+      <button onClick="{{ why }}" style="flex:1; display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 12px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Why no alert?</button>
+      <button onClick="{{ add }}" style="flex:1; display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 12px; margin:0; box-sizing:border-box; background:transparent; border:1px solid var(--border); border-radius:var(--radius); color:var(--bright); font-family:var(--f-btn); font-size:var(--btn-size); font-weight:500; line-height:1; white-space:nowrap; cursor:pointer" style-active="background:var(--surface)">Add a watch</button>
+    </nav>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:393,&quot;height&quot;:900},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;'phone' | 'desktop'&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light' | 'dark'&quot;},&quot;hiddenDrops&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;onOpenDrop&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id: string) =&gt; void&quot;},&quot;onCart&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(label: string) =&gt; void&quot;},&quot;onAdd&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onWhy&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onTheme&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onToast&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(msg: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { hidden: [], gone: [], feedGone: false };
+  renderVals() {
+    const p = this.props, s = this.state;
+    const desk = p.layout === 'desktop';
+    const dark = p.mode === 'dark';
+    const say = m => () => p.onToast && p.onToast(m);
+    const hidden = (p.hiddenDrops || []).concat(s.hidden);
+    const drops = [
+      {id: 'satisfy', store: 'Satisfy Running', name: 'all', n: 2, count: '2 buyable items', when: 'newest 4m ago', stars: 0},
+      {id: 'comoli', store: 'RAGTAG', name: 'comoli', n: 12, count: '12 items · 11 buyable', when: 'newest 7s ago', stars: 3},
+      {id: 'yohji', store: 'RAGTAG', name: 'yohjiyamamotopourhomme', n: 1, count: '1 buyable item', when: '9m ago', stars: 0},
+    ].filter(d => !hidden.includes(d.id));
+    const dropped = drops.reduce((t, d) => t + d.n, 0);
+    const act = 1 + dropped;
+    const R = 'M6 1.5a4.5 4.5 0 1 1 0 9a4.5 4.5 0 1 1 0-9z';
+    const G = {
+      watching: {s: R, f: 'M6 4.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0-3.2z', ink: 'var(--text)'},
+      sold: {s: R, ink: 'var(--muted)'},
+      notyet: {s: R + 'M6 6V3.6', ink: 'var(--muted)'},
+      nobase: {s: R, dash: '2.1 1.43', ink: 'var(--no-baseline)'},
+      paused: {f: 'M2.5 2h2.5v8H2.5zM7 2h2.5v8H7z', ink: 'var(--muted)'},
+      backoff: {f: 'M1.5 2h2v8h-2zM5 4h2v6H5zM8.5 6h2v4h-2z', ink: 'var(--armed)'},
+      armed: {armed: true, ink: 'var(--armed)'},
+    };
+    const W = [
+      ['Satisfy Running', 'Justice Short 8″', 'M', 'armed', 'Armed', '12s ago · 45s'],
+      ['RAGTAG', 'comoli', '', 'watching', 'Watching · 739 tracked', '31s ago · 5m'],
+      ['RAGTAG', 'yohjiyamamotopourhomme', '', 'watching', 'Watching · 1,204 tracked · 1,188 in the feed now', '1m ago · 5m'],
+      ['Satisfy Running', 'all', '', 'watching', 'Watching · 142 tracked', '8s ago · 45s'],
+      ['Neighbour', 'Our Legacy Box Shirt', '48', 'sold', 'Sold out', '2m ago · 5m'],
+      ['Norda', '001 Trail', '9', 'sold', 'Sold out', '2m ago · 5m'],
+      ['Atelier New York', 'Guidi 796Z Back Zip Boot', '42', 'notyet', 'Not yet on sale', '4m ago · 15m'],
+      ['Nintendo Store', 'Zelda 40th Switch 2 bundle', '', 'nobase', 'No baseline · first check pending', 'never · 5m'],
+      ['Tracksmith', 'Session Shorts', 'M', 'sold', 'Sold out', '3m ago · 5m'],
+      ['Cafelat', 'Robot Barista', '', 'sold', 'Sold out', '3m ago · 5m'],
+      ['Option-O', 'Lagom P64', '', 'backoff', 'Backing off · the store asked for fewer requests', '6m ago · 15m'],
+      ['Namu', 'Kapital Century Denim', '32', 'sold', 'Sold out', '4m ago · 5m'],
+      ['SSENSE', 'Our Legacy', '', 'watching', 'Watching · 88 tracked', '2m ago · 5m'],
+      ['Haven', 'Arc’teryx Veilance', '', 'watching', 'Watching · 213 tracked', '1m ago · 5m'],
+      ['Sey', 'Gesha · Ethiopia', '', 'notyet', 'Not yet on sale', '5m ago · 15m'],
+      ['Onyx', 'Ninety Plus Gesha', '', 'sold', 'Sold out', '3m ago · 5m'],
+      ['Neighbour', 'auralee', '', 'watching', 'Watching · 61 tracked', '2m ago · 5m'],
+      ['Best Buy', 'Switch 2 Mario Kart bundle', '', 'sold', 'Sold out', '4m ago · 5m'],
+      ['Atelier New York', 'Carol Christian Poell', '', 'watching', 'Watching · 34 tracked', '3m ago · 15m'],
+      ['Weber', 'Key Grinder', '', 'paused', 'Paused', '2d ago · off'],
+    ];
+    const reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const armedGlyph = React.createElement('svg', {viewBox: '0 0 12 12', width: 12, height: 12, 'aria-hidden': true, style: {flex: 'none', marginTop: 4}},
+      React.createElement('path', {d: 'M6 1 11 6 6 11 1 6z', fill: reduce ? 'currentColor' : 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinejoin: 'round'}),
+      reduce ? null : React.createElement('circle', {cx: 6, cy: 6, r: 1.6, fill: 'currentColor', style: {animation: 'rs-tick 2.4s steps(1) infinite'}}));
+    const alerts = [
+      {id: 1, t: '8s ago', kind: 'Back in stock', what: 'satisfyrunning.com · Old tee'},
+      {id: 2, t: '7s ago', kind: 'Released', what: 'ragtag-global.com · Comoli Wool Silk Jacket'},
+      {id: 3, t: '2h ago', kind: 'Failing', what: 'havenshop.com · auralee'},
+      {id: 4, t: '3h ago', kind: 'Recovered', what: 'sey.com · Gesha · Ethiopia'},
+      {id: 5, t: '5h ago', kind: 'Released', what: 'shopneighbour.com · Our Legacy Box Shirt'},
+    ].filter(a => !s.gone.includes(a.id));
+    const cart = size => () => p.onCart && p.onCart(size + ' · AURALEE Super Light Wool Shirt');
+    return {
+      isDesk: desk, isPhone: !desk, isDark: dark, isLight: !dark,
+      themeLabel: dark ? 'Switch to light mode' : 'Switch to dark mode',
+      headline: act === 1 ? '1 thing to act on' : act + ' things to act on',
+      droppedN: dropped, hasDrops: drops.length > 0,
+      feedN: s.feedGone ? 0 : 1, hasFeed: !s.feedGone,
+      waitingLabel: '· ' + W.length + ' · nothing to do',
+      drops: drops.map(d => ({...d, whenLabel: ' · ' + d.when, p2: d.n > 1, p3: d.n > 2, starred: d.stars > 0, open: () => p.onOpenDrop && p.onOpenDrop(d.id)})),
+      clearDrops: () => { this.setState({hidden: ['satisfy', 'comoli', 'yohji']}); p.onToast && p.onToast('Cleared ' + dropped + ' drops · the watches keep running'); },
+      clearFeed: () => this.setState({feedGone: true}),
+      openFeed: say('Feed items open in a sheet like drops. That sheet isn’t in this prototype.'),
+      cartM: cart('M'), cartL: cart('L'), cartXL: cart('XL'),
+      alsoL: say('Also alerting on L · AURALEE Hard Twist Denim Wide Pants'),
+      fixUrl: say('Fix URL opens the edit sheet. It isn’t in this prototype.'),
+      checkNow: say('Checked just now · still HTTP 403'),
+      pause: say('Paused · Haven · auralee'),
+      details: say('Details aren’t in this prototype.'),
+      why: () => p.onWhy && p.onWhy(),
+      add: () => p.onAdd && p.onAdd(),
+      theme: () => p.onTheme && p.onTheme(),
+      waitingN: W.length,
+      waiting: W.map((w, i) => {
+        const g = G[w[3]];
+        return {store: w[0], name: w[1], size: w[2] ? ' · size ' + w[2] : '', status: w[4], time: w[5], ink: g.ink,
+          armed: !!g.armed, plain: !g.armed, gs: g.s || 'M0 0', gf: g.f || 'M0 0', dash: g.dash || 'none', rule: i > 0 && i % 5 === 0};
+      }),
+      armedGlyph,
+      alertsN: alerts.length, hasAlerts: alerts.length > 0,
+      alerts: alerts.map(a => ({...a, rest: ' · ' + a.what, x: () => this.setState(st => ({gone: st.gone.concat(a.id)}))})),
+      clearAlerts: () => this.setState({gone: [1, 2, 3, 4, 5]}),
+    };
+  }
+}
+</script>
+</body>
+</html>

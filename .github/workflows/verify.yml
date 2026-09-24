@@ -85,20 +85,27 @@ jobs:
           grep -o '\.wait[^}]*}' page.html | grep -E 'grid-|\.n\{|\.s\{|\.wa\{' || true
           echo "::endgroup::"
 
-          if grep -q '\.wait \.n{grid-column:1/-1' page.html; then
-            echo "layout fix     : PRESENT in the served page"
+          # The property that matters: a watch's name owns a row and never
+          # shares a growing `auto` track with its status — the bug that broke
+          # names one letter per line. Two layouts have it. Kinari uses grid
+          # areas ("n n wa" / "s t wa"); the layout before it gave .n
+          # grid-column 1/-1 and had to be rid of the old three-column rule.
+          # Either is accepted, because this job reads the page the server is
+          # serving now, which trails a push by one deploy.
+          if grep -q 'grid-template-areas:"n n wa" "s t wa"' page.html; then
+            echo "waiting rows   : name on its own row (Kinari grid areas)"
+          elif grep -q '\.wait \.n{grid-column:1/-1' page.html \
+               && ! grep -q 'minmax(0,1fr) auto auto' page.html; then
+            echo "waiting rows   : name on its own row (pre-Kinari layout)"
           else
-            echo "layout fix     : ABSENT from the served page"
+            echo "waiting rows   : NAME SHARES A ROW WITH ITS STATUS — the letter-per-line bug"
             fail=1
           fi
 
-          # And the shape that produced the bug must be gone, not merely
-          # accompanied. A botched merge could leave both.
-          if grep -q 'minmax(0,1fr) auto auto' page.html; then
-            echo "old 3-col rule : STILL PRESENT — it would win if it comes later"
-            fail=1
+          if grep -q 'family=Newsreader' page.html; then
+            echo "design         : Kinari served"
           else
-            echo "old 3-col rule : gone"
+            echo "design         : Kinari not served yet — deploy pending"
           fi
 
           # Reported, not enforced: the deploy runs on a timer, so the push
