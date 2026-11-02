@@ -136,14 +136,22 @@ async def create_watch(body: WatchCreate):
     if tier not in TIERS:
         raise HTTPException(400, f"tier must be one of {sorted(TIERS)}")
 
-    term = strategies.shopify.search_query(body.url)
+    # A link shared from Google's app is a redirect, not the page: the watch
+    # stores the store's own URL, never the share link.
+    try:
+        url = await strategies.resolve_share_link(body.url.strip())
+    except strategies.ShareLinkError as exc:
+        raise HTTPException(422, str(exc))
+    fields["url"] = url
+
+    term = strategies.shopify.search_query(url)
     if term:
         raise HTTPException(422, SEARCH_URL_MESSAGE.format(
             q=term, slug=re.sub(r"[^a-z0-9]+", "", term.lower())))
 
     # Sniff the platform unless the caller pinned one explicitly.
     if not body.strategy:
-        detected = await strategies.detect(body.url)
+        detected = await strategies.detect(url)
         if not detected:
             raise HTTPException(
                 422,
@@ -167,11 +175,11 @@ async def create_watch(body: WatchCreate):
     fields.setdefault("kind", "product")
     # Pinning `strategy` skips detection, which is where a name normally comes
     # from — so a feed watch would otherwise render its raw URL as its title.
-    fields.setdefault("brand", _host(body.url))
-    fields.setdefault("name", _fallback_name(body.url, fields.get("target_ref")))
+    fields.setdefault("brand", _host(url))
+    fields.setdefault("name", _fallback_name(url, fields.get("target_ref")))
     fields["base_interval_s"] = TIERS[tier]
     fields["next_check_at"] = EPOCH
-    _saved_search(fields, body.url)
+    _saved_search(fields, url)
     _currency(fields)
 
     watch_id = db.create_watch(**fields)

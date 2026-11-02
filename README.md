@@ -669,6 +669,22 @@ the question that otherwise needs a shell on the server, which is exactly what
 is unavailable when a network sits between you and the dashboard.
 **`/status`** lists watches and when each was last swept.
 
+**Share links work.** A page shared from Google's app arrives as a
+`share.google` link, a redirect rather than the page. Detection reads the URL
+itself (a Shopify product is `/products/<handle>`), so it used to answer
+"Nothing I recognise" however watchable the page behind it was. `/add`,
+`/check` and the dashboard's Add a watch now follow `share.google`, `goo.gl`,
+`g.co`, `search.app` and `bit.ly` links to the page, at most five hops and
+https only. They store the store's own URL, without tracking parameters but
+keeping `?variant=`. A link that lands on a Google search, which is what
+sharing from a results list gives you, is refused with what to do instead,
+since a search is nothing to watch. Any other URL is left alone and costs no
+request.
+
+To see where a link goes without the server, run the **`check-url`**
+workflow with it. A GitHub runner follows it and, for a Shopify product,
+prints the title, price and every size with whether it can be bought.
+
 Long polling, not a webhook: a webhook needs a public URL registered with
 Telegram and a secret in the environment, and editing the environment on the
 server is the thing that is hard to reach. The bot token is already there.

@@ -99,6 +99,11 @@ async def _check(url: str) -> str:
     The question that otherwise needs a shell on the server, which is exactly
     what is unavailable when a network sits between you and the dashboard.
     """
+    # A link shared from Google's app is a redirect, not the page.
+    try:
+        url = await strategies.resolve_share_link(url)
+    except strategies.ShareLinkError as exc:
+        return _esc(str(exc))
     refusal = _bad_url(url)
     if refusal:
         return refusal
@@ -189,6 +194,11 @@ async def _status() -> str:
 
 async def _add(url: str) -> str:
     """Start watching an address, applying any saved search it carries."""
+    # A link shared from Google's app is a redirect, not the page.
+    try:
+        url = await strategies.resolve_share_link(url)
+    except strategies.ShareLinkError as exc:
+        return _esc(str(exc))
     refusal = _bad_url(url)
     if refusal:
         return refusal

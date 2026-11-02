@@ -1718,6 +1718,9 @@ async function detect() {
   $('detect').innerHTML = '<div class="detect">Identifying…</div>';
   try {
     const d = await api('/detect', {method: 'POST', body: JSON.stringify({url})});
+    /* A share link was unwrapped: show the store's own address, which is
+       what the watch will store anyway. */
+    if (d.resolved_url) $('aUrl').value = d.resolved_url;
     const vs = d.variants || [];
     const named = vs.map(v => v.title).filter(t => t && !/^default/i.test(t));
     $('detect').innerHTML = `<div class="detect">${GLYPH.in_stock}<div>
