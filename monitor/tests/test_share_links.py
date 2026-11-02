@@ -50,6 +50,27 @@ def store_behind_the_share(destination=None):
 
 # --- the helper ---------------------------------------------------------------
 
+GENTLE_MONSTER = "https://www.gentlemonster.com/us/en/item/0P0M4JBCDF0PC/futura02"
+
+
+@respx.mock
+async def test_the_real_share_google_chain_reaches_the_store():
+    """Copied from a GitHub runner following this exact link on 2026-11-02.
+
+    share.google does not go straight to the page: it passes through
+    www.google.com/share.google first. The first version stopped there and
+    returned the Google URL as if it were the product — a one-hop mock had
+    hidden it.
+    """
+    respx.get(SHARE).mock(return_value=httpx.Response(
+        302, headers={"Location": "https://www.google.com/share.google?q=hx9StfBVJePrIzzYN"}))
+    respx.get("https://www.google.com/share.google?q=hx9StfBVJePrIzzYN").mock(
+        return_value=httpx.Response(301, headers={"Location": GENTLE_MONSTER
+            + "?srsltid=AYCX9vLTyNqy32DBFbTH7-oYcZiPrxaDqx2EaU_UQ9N33MpiICBqVIKs&shem=aimgspe,"}))
+
+    assert await resolve_share_link(SHARE) == GENTLE_MONSTER
+
+
 @respx.mock
 async def test_a_share_link_becomes_the_page_without_its_tracking():
     store_behind_the_share()

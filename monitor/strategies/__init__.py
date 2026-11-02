@@ -63,7 +63,7 @@ SHARE_HOSTS = {"share.google", "goo.gl", "g.co", "search.app", "bit.ly"}
 SHARE_MAX_HOPS = 5
 # Query parameters a share adds that say nothing about the product. The rest
 # stay: ?variant= is the size the person was looking at.
-_TRACKING = re.compile(r"^(utm_.*|srsltid|gclid|gbraid|wbraid|fbclid|_pos|_sid|_ss)$", re.I)
+_TRACKING = re.compile(r"^(utm_.*|srsltid|shem|gclid|gbraid|wbraid|fbclid|_pos|_sid|_ss)$", re.I)
 _META_REFRESH = re.compile(
     r'<meta[^>]+http-equiv=["\']?refresh["\']?[^>]+content=["\'][^"\']*url=([^"\'>]+)', re.I)
 
@@ -85,6 +85,19 @@ def _host(url: str) -> str:
 
 def _is_google(host: str) -> bool:
     return host == "google.com" or host.startswith("google.") or host.endswith(".google.com")
+
+
+def _is_share_hop(url: str) -> bool:
+    """A step on the way to the page rather than the page.
+
+    share.google does not go straight to the store: it answers with
+    www.google.com/share.google?q=<id>, and that hop redirects to the page.
+    Stopping at the first host outside SHARE_HOSTS returned that Google URL
+    as if it were the product.
+    """
+    host = _host(url)
+    return host in SHARE_HOSTS or (_is_google(host)
+                                   and urlparse(url).path == "/share.google")
 
 
 def _clean(url: str) -> str:
@@ -122,7 +135,7 @@ async def resolve_share_link(url: str) -> str:
                 continue
         if _is_google(host) and urlparse(current).path.startswith("/search"):
             raise ShareLinkError(GOOGLE_SEARCH_MESSAGE)
-        if host not in SHARE_HOSTS:
+        if not _is_share_hop(current):
             return _clean(current)
         try:
             resp = await client.get(current, follow_redirects=False,

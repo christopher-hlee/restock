@@ -13,9 +13,15 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # The app's own dependencies, so the script can also run the real
+      # resolve → detect → check path, not only its own approximation.
+      - run: pip install -q -r monitor/requirements.txt
       # Through the environment, never pasted into the command: an input is
       # text someone typed, and ${{ }} in a run line would execute it.
       - env:

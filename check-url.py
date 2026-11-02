@@ -12,7 +12,11 @@ links or storefronts. For one URL it:
    prints the title, vendor, price and every variant with whether it can be
    bought, which is exactly what a product watch will see;
 3. otherwise says what it found: a Google search page (not something to
-   watch), or a page with or without schema.org Product data.
+   watch), or a page with or without schema.org Product data;
+4. when the app's own dependencies are installed (the workflow installs
+   them), runs the app's real path on it: resolve_share_link, detect, then
+   one check. That is exactly what /add would store and what the first sweep
+   would see, rather than this script's approximation of it.
 
     python3 check-url.py https://share.google/…
 """
@@ -140,6 +144,55 @@ def describe_page(final, body):
     print(f"  schema.org : {'Product data present' if product_ld else 'no Product data'}")
 
 
+def app_view(url):
+    """The app's own answer, through the code the server runs."""
+    try:
+        import asyncio
+        sys.path.insert(0, ".")
+        from monitor import strategies
+        from monitor.fetcher import close_client
+    except ImportError as exc:
+        print(f"\n(app dependencies not installed, skipping the app's view: {exc})")
+        return 0
+
+    async def run():
+        print("\nTHE APP'S VIEW — what /add stores and the first check sees")
+        try:
+            resolved = await strategies.resolve_share_link(url)
+        except strategies.ShareLinkError as exc:
+            print(f"  refused: {exc}")
+            return 1
+        print(f"  resolved : {resolved}")
+        found = await strategies.detect(resolved)
+        if not found:
+            print("  detect   : nothing recognised — /add would refuse it")
+            return 1
+        for k in ("strategy", "kind", "name", "brand", "target_ref", "detected_via"):
+            if found.get(k):
+                print(f"  {k:<9}: {found[k]}")
+        watch = {"id": 0, "url": found.get("url") or resolved,
+                 "strategy": found.get("strategy"), "kind": found.get("kind") or "product",
+                 "target_ref": found.get("target_ref"), "name": found.get("name")}
+        r = await strategies.check(watch)
+        print(f"  check ok : {r.ok}   http {r.http_status}")
+        if not r.ok:
+            print(f"  error    : {r.error}")
+            return 1
+        print(f"  state    : {r.state}")
+        print(f"  title    : {r.title}")
+        print(f"  price    : {r.price}")
+        extra = r.extra or {}
+        if extra.get("availability"):
+            print(f"  schema   : {', '.join(extra['availability'])}"
+                  f"{'  (preorder)' if extra.get('preorder') else ''}")
+        for o in (extra.get("offers") or [])[:12]:
+            print(f"    offer  : {o.get('title')}  {o.get('price')}")
+        await close_client()
+        return 0
+
+    return asyncio.run(run())
+
+
 def main():
     if len(sys.argv) != 2:
         print("usage: check-url.py <url>")
@@ -158,7 +211,7 @@ def main():
         return 1
     if not shopify_product(final):
         describe_page(final, body)
-    return 0
+    return app_view(url)
 
 
 if __name__ == "__main__":
