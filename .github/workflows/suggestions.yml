@@ -17,7 +17,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - run: python3 check-suggestions.py ${{ inputs.hosts }}
+      # Through the environment, never pasted into the command: an input is
+      # text someone typed, and ${{ }} in a run line would execute it. Left
+      # unquoted on purpose, so the space-separated hosts split into words.
+      - env:
+          HOSTS: ${{ inputs.hosts }}
+        run: python3 check-suggestions.py $HOSTS
       - uses: actions/upload-artifact@v4
         if: always()
         with:

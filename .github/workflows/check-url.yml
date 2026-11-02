@@ -1,0 +1,23 @@
+# Where does a link go, and can Restock watch what is there? Run by hand with
+# one URL. A runner can reach share links and storefronts; the development
+# container cannot.
+name: check-url
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "The link to follow and check"
+        required: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      # Through the environment, never pasted into the command: an input is
+      # text someone typed, and ${{ }} in a run line would execute it.
+      - env:
+          URL: ${{ inputs.url }}
+        run: python3 check-url.py "$URL"
