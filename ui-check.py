@@ -105,6 +105,17 @@ def seed():
         db.insert_event(wid, "new_product", "watching", "watching", {
             "handles": handles, "items": items, "arrival": arrival,
             "baseline_count": 739, "listed_ago_s": 210})
+    # A staged drop: on sale in the feed, but its page still says Coming soon.
+    staged = "fuzzfleece™-ad-hoodie-cl"
+    db.insert_event(wid, "new_product", "watching", "watching", {
+        "handles": [staged], "arrival": "launched", "first_sale": [staged],
+        "baseline_count": 739,
+        "page_coming_soon": {"checked": [staged], "soon": [staged]},
+        "items": {staged: {"title": "FuzzFleece™ AD Hoodie CL", "price": 345.0,
+                           "available": True, "available_stated": True,
+                           "image": "https://img.test/staged.jpg",
+                           "url": f"https://www.satisfyrunning.com/products/{staged}",
+                           "offers": [{"title": "M", "cart_url": "https://x/cart/3:1"}]}}})
 
     # A news feed, grouped the same way but read rather than bought.
     feed = db.create_watch(
@@ -299,7 +310,7 @@ def main() -> int:
                 fail(f"RAGTAG bucket should say '12 buyable items': {first!r}")
             satisfy_row = page.locator(".bucket", has_text="satisfyrunning")
             satisfy = satisfy_row.inner_text() if satisfy_row.count() else ""
-            if "3 items · 2 buyable" not in satisfy:
+            if "4 items · 3 buyable" not in satisfy:
                 fail(f"a coming-soon item must not be counted buyable: {satisfy!r}")
 
             # Photos arrive, and are squares whatever shape the file is.
@@ -413,6 +424,15 @@ def main() -> int:
                 page.wait_for_timeout(150)
                 if sheet.is_visible():
                     fail("the sheet's close button did not close it")
+                # On sale in the feed, Coming soon on the page: say so.
+                page.locator(".bucket", has_text="satisfyrunning").click()
+                page.wait_for_timeout(250)
+                if "cart early" not in page.inner_text(".bucket-sheet").lower():
+                    fail("a drop whose page still says Coming soon lost its cart-early tag")
+                no_junk(".bucket-sheet")
+                page.screenshot(path=f"/tmp/ui-{label}-staged.png")
+                page.click(".sheet-head .x")
+                page.wait_for_timeout(150)
 
             # ---- the add sheet: no iOS zoom, and its button in reach
             (page.locator(".dock .btn-accent") if phone
