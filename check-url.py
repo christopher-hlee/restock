@@ -163,6 +163,21 @@ MARKER = re.compile(r"soon|launch|coming|pre-?order|upcoming|release|drop", re.I
 LD = re.compile(r'<script[^>]+application/ld\+json[^>]*>(.*?)</script>', re.I | re.S)
 FORM = re.compile(r'<form[^>]+action=["\'][^"\']*/cart/add[^"\']*["\'][^>]*>(.*?)</form>', re.I | re.S)
 BUTTON = re.compile(r'<button[^>]*(?:name=["\']add["\']|type=["\']submit["\'])[^>]*>.*?</button>', re.I | re.S)
+# Anything on the page that could be a launch time a theme counts down to.
+TIMING = re.compile(r'([\w:-]*(?:launch|release|drop|countdown|go-?live|start|unlock)[\w:-]*)'
+                    r'\s*[=:]\s*["\']?([^"\'<>\s,}]{4,40})', re.I)
+
+
+def soon_contexts(body, limit=4):
+    """Where "Coming soon" sits, as raw HTML, so the element that carries it
+    (and whatever decides to show it) can be read off the page."""
+    out = []
+    for m in re.finditer(r"coming\s+soon", body, re.I):
+        a, b = max(0, m.start() - 320), min(len(body), m.end() + 200)
+        out.append(re.sub(r"\s+", " ", body[a:b]))
+        if len(out) >= limit:
+            break
+    return out
 
 
 def is_listing(url):
@@ -202,6 +217,9 @@ def page_view(base, handle):
         "page_soon": len(re.findall(r"coming\s+soon", body, re.I)),
         "ld": sorted({a.rsplit("/", 1)[-1] for a in ld}) or ["-"],
         "button_html": re.sub(r"\s+", " ", button)[:300],
+        "soon_html": soon_contexts(body),
+        "timing": sorted({f"{k}={v}" for k, v in TIMING.findall(body)
+                          if re.search(r"\d", v)})[:12],
     }
 
 
@@ -276,7 +294,9 @@ def collection_view(final):
                    created=p.get("created_at"), feed=f"{t}/{f}/{m}", js=js_avail,
                    tags=flagged, **pv)
         rows.append(row)
-        if feed_buyable and page_says_no:
+        # "Coming soon" anywhere on the page counts: the theme may put it
+        # outside the cart form entirely, which is where Satisfy's sits.
+        if feed_buyable and (page_says_no or pv.get("page_soon")):
             disagree.append((row, vs))
         print(f"{h}")
         print(f"   {p.get('title')} · published {p.get('published_at')} · created {p.get('created_at')}")
@@ -289,8 +309,12 @@ def collection_view(final):
     print(f"\nall tags seen on recent products: "
           f"{sorted({x for p in recent for x in (p.get('tags') or [])})[:80]}")
 
-    print(f"\nFEED SAYS BUYABLE, PAGE DOES NOT: {len(disagree)} of {len(rows)}")
+    print(f"\nFEED SAYS BUYABLE, PAGE SAYS NOT OR 'COMING SOON': {len(disagree)} of {len(rows)}")
     for row, vs in disagree[:3]:
+        print(f"\n  {row['handle']} — where 'Coming soon' is on the page:")
+        for snip in row.get("soon_html") or []:
+            print(f"    … {snip} …")
+        print(f"    timing-like attributes: {row.get('timing') or '-'}")
         vid = next((v["id"] for v in vs if v.get("available") is not False), vs[0]["id"] if vs else None)
         time.sleep(1.2)
         status, why = cart_accepts(base, vid) if vid else ("-", "no variant")
