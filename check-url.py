@@ -96,7 +96,9 @@ def shopify_product(final):
     m = re.search(r"/products/([^/?#]+)", u.path)
     if not m:
         return False
-    handle = m.group(1)
+    # Normalised to one encoding: Satisfy's handles carry a raw "™", which an
+    # HTTP request line cannot hold.
+    handle = urllib.parse.quote(urllib.parse.unquote(m.group(1)), safe="")
     status, _, body = get(f"https://{u.netloc}/products/{handle}.js",
                           accept="application/json")
     if status != 200:
@@ -178,7 +180,7 @@ def jget(url):
 
 def page_view(base, handle):
     """What a person sees: the buy form, its button, and the page's offers."""
-    status, _, body = get(f"{base}/products/{handle}")
+    status, _, body = get(f"{base}/products/{urllib.parse.quote(handle, safe='')}")
     if status != 200:
         return {"page": status}
     forms = FORM.findall(body)
@@ -263,7 +265,7 @@ def collection_view(final):
         tags = tags if isinstance(tags, list) else [x.strip() for x in str(tags).split(",")]
         flagged = [x for x in tags if MARKER.search(x)]
         time.sleep(1.2)
-        js_status, js = jget(f"{base}/products/{h}.js")
+        js_status, js = jget(f"{base}/products/{urllib.parse.quote(h, safe='')}.js")
         js_avail = js.get("available") if isinstance(js, dict) else f"({js_status})"
         time.sleep(1.2)
         pv = page_view(base, h)
@@ -293,7 +295,7 @@ def collection_view(final):
         time.sleep(1.2)
         status, why = cart_accepts(base, vid) if vid else ("-", "no variant")
         print(f"  {row['handle']}: cart/add.js -> {status} {why}")
-        print(f"    button html: {row['button_html']}")
+        print(f"    page {row.get('page')} · button html: {row.get('button_html', '-')}")
     return 0
 
 
