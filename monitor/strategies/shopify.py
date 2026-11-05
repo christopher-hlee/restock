@@ -496,6 +496,47 @@ async def _check_collection_atom(base: str, coll: str | None, watch: dict,
 
 # ----------------------------------------------------------------- detection
 
+# ---------------------------------------------------------- the page's own say
+
+# Satisfy stages a drop by putting it on sale in every system but one: the
+# feed, the product API and the page's schema.org data all say buyable, and
+# the cart accepts it (checked from a runner on 2026-11-05: /cart/add.js
+# answered 200 for each), while the theme swaps the buy button for a
+# server-rendered "Coming Soon" one. Only the page says it, so only the page
+# can be asked.
+_BUTTON_TAG = re.compile(r"<button\b[^>]*>", re.I)
+_SOON_LABEL = re.compile(r"\s*(?:<span[^>]*>\s*)?coming\s+soon", re.I)
+# The product's own form button, as Shopify themes name it. A related item's
+# card is a quick-add button, and its COMING SOON badge is not a button at all.
+_MAIN_BUTTON = re.compile(r'name=["\'](?:notify|add)["\']|__main\b|product-form__submit', re.I)
+_QUICK_ADD = re.compile(r'id=["\']quick-add', re.I)
+_FLAG = re.compile(r'data-coming-soon=["\']?true\b', re.I)
+
+
+def page_coming_soon(html: str) -> bool:
+    """Whether the product's own buy button is a "Coming soon" one.
+
+    Only the main button counts. A product page lists other products too, and
+    a related item's card saying COMING SOON says nothing about this one.
+    """
+    html = html or ""
+    for m in _BUTTON_TAG.finditer(html):
+        tag = m.group(0)
+        if _QUICK_ADD.search(tag) or not _MAIN_BUTTON.search(tag):
+            continue
+        if _FLAG.search(tag) or _SOON_LABEL.match(html, m.end()):
+            return True
+    return False
+
+
+async def page_says_coming_soon(url: str) -> bool | None:
+    """Ask the product page. None when it could not be read."""
+    resp = await fetch(url, headers={"Accept": "text/html,*/*;q=0.8"}, retries=0)
+    if not resp.ok or not resp.text:
+        return None
+    return page_coming_soon(resp.text)
+
+
 async def detect(url: str) -> dict | None:
     """Return watch config if this URL is a Shopify store, else None."""
     base = origin(url)

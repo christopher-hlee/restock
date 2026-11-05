@@ -70,6 +70,10 @@ def _sizes(payload: dict) -> list[str]:
             if o.get("title") and o["title"].lower() not in ("default title", "default")]
 
 
+def _pages(k: int) -> str:
+    return "The page I checked" if k == 1 else f"All {k} pages I checked"
+
+
 def render(watch: dict, kind: str, payload: dict) -> str:
     """Build one message body per event kind.
 
@@ -165,7 +169,18 @@ def render(watch: dict, kind: str, payload: dict) -> str:
             return text
 
         arrival = payload.get("arrival") or "new"
-        if arrival == "launched":
+        # What the product pages themselves said, when the scheduler asked a
+        # few of them. A store can stage a drop: on sale in its feed and its
+        # cart, while the page still shows a Coming Soon button. "Released"
+        # alone then sends you to a page with nothing to press.
+        pages = payload.get("page_coming_soon") or {}
+        checked, soon = pages.get("checked") or [], pages.get("soon") or []
+        staged = bool(checked) and len(soon) == len(checked)
+        if arrival == "launched" and staged:
+            lines.append(f"<b>⚡ {n} buyable early at {_esc(brand or title)}</b>")
+            lines.append("On sale in the store's own data, though the page "
+                         "still says Coming soon:")
+        elif arrival == "launched":
             # Not new to the catalogue — new to the checkout. This is the alert
             # for a "coming soon" listing that has just gone buyable, which is
             # the moment that actually matters and the one a handle diff can
@@ -208,6 +223,17 @@ def render(watch: dict, kind: str, payload: dict) -> str:
             lines.append(line(h))
         if n > 10:
             lines.append(f"· …and {n - 10} more")
+        if staged:
+            lines.append("")
+            lines.append(f"<i>{_pages(len(checked))} still "
+                         f"{'says' if len(checked) == 1 else 'say'} Coming soon. "
+                         "The store already counts them as buyable, so the cart "
+                         "link may get you in before the page opens.</i>")
+        elif soon:
+            lines.append("")
+            lines.append(f"<i>{len(soon)} of the {len(checked)} pages I checked "
+                         "still say Coming soon; the cart link may work before "
+                         "the page does.</i>")
         if any((payload.get("items") or {}).get(h, {}).get("starred")
                for h in handles):
             lines.append("")

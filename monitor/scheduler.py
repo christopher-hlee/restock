@@ -20,7 +20,7 @@ from .config import (
     MAX_CONCURRENT_CHECKS, TICK_SECONDS,
 )
 from .notify import heartbeat, ntfy, telegram
-from .statemachine import (PRICE_DROP, WATCH_FAILING, adapt_interval, decide,
+from .statemachine import (NEW_PRODUCT, PRICE_DROP, WATCH_FAILING, adapt_interval, decide,
                            next_interval)
 from .timeutil import is_future, parse, seconds_since, stamp, stamp_in, utcnow
 
@@ -201,10 +201,47 @@ def _effective_level(watch: dict, kind: str) -> str:
     return "critical" if watch.get("alert_level") == "critical" else "info"
 
 
+# How many product pages to read before announcing a drop. Enough to tell a
+# staged launch from a live one, few enough to keep the alert inside its
+# minute: a drop can be forty items, and every page read is a request to a
+# store that is busiest at exactly that moment.
+PAGE_SAMPLE = 3
+
+
+async def _ask_the_pages(watch: dict, payload: dict) -> None:
+    """Note in the alert when the product pages still say "Coming soon".
+
+    The feed can call an item buyable while its page shows a Coming Soon
+    button, and the cart still takes it. That is a drop the store has staged,
+    not one the page has opened. Announcing it as plainly "released" sent you
+    to a page with no buy button. Saying so keeps the alert honest and still
+    early.
+    """
+    items = payload.get("items") or {}
+    buyable = [h for h in payload.get("handles") or []
+               if (items.get(h) or {}).get("available") and (items.get(h) or {}).get("url")]
+    checked, soon = [], []
+    for handle in buyable[:PAGE_SAMPLE]:
+        try:
+            said = await strategies.shopify.page_says_coming_soon(items[handle]["url"])
+        except Exception:                    # never cost the alert itself
+            said = None
+        if said is None:
+            continue
+        checked.append(handle)
+        if said:
+            soon.append(handle)
+    if checked:
+        payload["page_coming_soon"] = {"checked": checked, "soon": soon}
+
+
 async def _emit(watch: dict, event) -> None:
     if _suppressed(watch, event.kind):
         log.info("watch %s: %s suppressed by cooldown", watch["id"], event.kind)
         return
+
+    if event.kind == NEW_PRODUCT and watch.get("strategy") == "shopify":
+        await _ask_the_pages(watch, event.payload)
 
     level = _effective_level(watch, event.kind)
     event_id = db.insert_event(watch["id"], event.kind, event.from_state,

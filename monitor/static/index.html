@@ -997,6 +997,19 @@ function arrivalTag(it, e) {
   const p = e.payload || {};
   if (it.available === false && it.available_stated)
     return '<span class="tag soon" title="Listed, nothing buyable yet">coming soon</span>';
+  /* The feed says buyable, the page still shows Coming soon. The scheduler
+     reads up to three pages per alert; the rest of the drop is judged by
+     those, and the title says which. */
+  const pg = p.page_coming_soon;
+  if (pg && Array.isArray(pg.soon) && Array.isArray(pg.checked) && pg.checked.length) {
+    const read = pg.checked.includes(it.handle);
+    const staged = pg.soon.length === pg.checked.length;
+    if (pg.soon.includes(it.handle) || (!read && staged))
+      return '<span class="tag soon" title="' + (read
+        ? 'Its page still says Coming soon, but the store already counts it as buyable: the cart link may work first'
+        : 'Not read, but every page read from this drop still said Coming soon; the store already counts it as buyable')
+        + '">cart early</span>';
+  }
   if (p.arrival === 'relisted') return '<span class="tag relisted">relisted</span>';
   if (p.arrival === 'unconfirmed')
     return '<span class="tag unverified" title="The store gave no listing date, so this may not be new">unverified?</span>';

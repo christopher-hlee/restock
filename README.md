@@ -315,6 +315,33 @@ debut we have no way to know about.
 Watch rows show **Not yet on sale** rather than *Sold out* for a product with
 no recorded sale, for the same reason.
 
+### On sale everywhere but the page
+
+The flag is not always the last word. On 2026-11-05 Satisfy released thirteen
+products that were on sale in the feed, the product API and the page's
+schema.org data. A runner's `/cart/add.js` accepted every one it tried. The
+product pages still showed a server-rendered **Coming Soon** button
+(`data-coming-soon="true"`, `name="notify"`). The alert said *released* and
+sent you to a page with nothing to press.
+
+The drop was real, so the alert still fires. Before a Shopify drop alert goes
+out, the scheduler reads up to **three** of its product pages. It reads only
+the product's own buy button, never the related items' COMING SOON badges.
+When every page it read still says Coming soon, the alert becomes
+⚡ *N buyable early*, says the page has not opened yet, and says the cart link
+may get you in first. The dashboard tags those items **cart early**. A mixed
+sample is reported as a count. A page that cannot be read changes nothing and
+never delays the alert past those three requests.
+
+Three, because a drop can be forty items and every page read lands on the
+store at its busiest minute.
+
+The same alert path has one more guard. A sweep that does not state
+availability, such as the Atom fallback or variants with no `available` field,
+leaves the ledger as it was. One Atom read used to mark the whole catalogue
+unavailable, so the next normal sweep announced every buyable product as a
+launch.
+
 ### A republished item you cannot buy is not news
 
 Watching the whole store instead of a curated collection costs something: the
