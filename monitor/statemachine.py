@@ -358,7 +358,11 @@ def _became_buyable(prev_availability, items, handle, now) -> bool:
     would qualify, and a monitor whose first act is to alert on 300 things it
     was already watching has taught you to ignore it.
     """
-    if not (items.get(handle) or {}).get("available"):
+    item = items.get(handle) or {}
+    # Only a reading the store actually stated. The feed's permissive default
+    # counts a variant with no `available` flag as buyable — right for
+    # building cart links, wrong for announcing that something went on sale.
+    if not (item.get("available") and item.get("available_stated")):
         return False
     before = (prev_availability or {}).get(handle)
     if not isinstance(before, dict) or before.get("available") is not False:
@@ -381,6 +385,14 @@ def _fold_availability(prev, items, handles, *, alerted, now) -> dict:
         item = items.get(handle) or {}
         before = ledger.get(handle)
         before = before if isinstance(before, dict) else {}
+        # A read that does not state availability says nothing about it. The
+        # Atom fallback has no variants at all, and recording its items as
+        # unavailable marked the whole catalogue sold out, so the next
+        # products.json sweep announced every buyable product as a launch.
+        if not item.get("available_stated"):
+            if before:
+                ledger[handle] = before
+            continue
         buyable = bool(item.get("available"))
         entry = {"available": buyable}
         # Two storefront states share one API flag. "Coming soon" and "notify
