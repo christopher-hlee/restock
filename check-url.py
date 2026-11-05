@@ -13,7 +13,14 @@ links or storefronts. For one URL it:
    bought, which is exactly what a product watch will see;
 3. otherwise says what it found: a Google search page (not something to
    watch), or a page with or without schema.org Product data;
-4. when the app's own dependencies are installed (the workflow installs
+4. for a store or collection URL instead of a product, reads the catalogue
+   and, for every product published in the last two weeks, sets what the
+   feed says beside what the product page shows a person: the feed's variant
+   flags and tags, /products/<handle>.js, the page's schema.org
+   availability, its buy button and any "Coming soon" in the buy form. Where
+   the feed says buyable and the page does not, it asks the cart itself
+   (an anonymous /cart/add.js) for up to three of them, which settles it;
+5. when the app's own dependencies are installed (the workflow installs
    them), runs the app's real path on it: resolve_share_link, detect, then
    one check. That is exactly what /add would store and what the first sweep
    would see, rather than this script's approximation of it.
@@ -144,6 +151,152 @@ def describe_page(final, body):
     print(f"  schema.org : {'Product data present' if product_ld else 'no Product data'}")
 
 
+# ---------------------------------------------------------------- collections
+
+import time
+from datetime import datetime, timedelta, timezone
+
+RECENT_DAYS = 14
+MARKER = re.compile(r"soon|launch|coming|pre-?order|upcoming|release|drop", re.I)
+LD = re.compile(r'<script[^>]+application/ld\+json[^>]*>(.*?)</script>', re.I | re.S)
+FORM = re.compile(r'<form[^>]+action=["\'][^"\']*/cart/add[^"\']*["\'][^>]*>(.*?)</form>', re.I | re.S)
+BUTTON = re.compile(r'<button[^>]*(?:name=["\']add["\']|type=["\']submit["\'])[^>]*>.*?</button>', re.I | re.S)
+
+
+def is_listing(url):
+    path = urllib.parse.urlparse(url).path.rstrip("/")
+    return path == "" or re.fullmatch(r"/collections/[^/]+", path) is not None
+
+
+def jget(url):
+    status, _, body = get(url, accept="application/json")
+    try:
+        return status, json.loads(body)
+    except (ValueError, TypeError):
+        return status, None
+
+
+def page_view(base, handle):
+    """What a person sees: the buy form, its button, and the page's offers."""
+    status, _, body = get(f"{base}/products/{handle}")
+    if status != 200:
+        return {"page": status}
+    forms = FORM.findall(body)
+    form = max(forms, key=len) if forms else ""
+    buttons = BUTTON.findall(form)
+    button = buttons[0] if buttons else ""
+    text = re.sub(r"<[^>]+>", " ", button)
+    text = re.sub(r"\s+", " ", html.unescape(text)).strip()
+    ld = []
+    for block in LD.findall(body):
+        ld += re.findall(r'"availability"\s*:\s*"([^"]+)"', block)
+    return {
+        "page": status,
+        "form": bool(form),
+        "button": text[:40] or "-",
+        "disabled": bool(re.search(r"\sdisabled(\s|=|>)", button)),
+        "form_soon": bool(re.search(r"coming\s+soon", form, re.I)),
+        "form_notify": bool(re.search(r"notify\s+me", form, re.I)),
+        "page_soon": len(re.findall(r"coming\s+soon", body, re.I)),
+        "ld": sorted({a.rsplit("/", 1)[-1] for a in ld}) or ["-"],
+        "button_html": re.sub(r"\s+", " ", button)[:300],
+    }
+
+
+def cart_accepts(base, variant_id):
+    """Ask the cart, which is the only source that cannot be decorative."""
+    body = json.dumps({"items": [{"id": variant_id, "quantity": 1}]}).encode()
+    req = urllib.request.Request(f"{base}/cart/add.js", data=body, method="POST",
+                                 headers={"User-Agent": UA, "Content-Type": "application/json",
+                                          "Accept": "application/json"})
+    try:
+        with OPENER.open(req, timeout=20) as r:
+            return r.status, "added"
+    except urllib.error.HTTPError as e:
+        try:
+            d = json.loads(e.read(20000).decode("utf-8", "replace"))
+            return e.code, d.get("description") or d.get("message") or str(d)[:120]
+        except ValueError:
+            return e.code, "(no JSON)"
+    except (urllib.error.URLError, OSError) as e:
+        return "error", str(getattr(e, "reason", e))
+
+
+def collection_view(final):
+    u = urllib.parse.urlparse(final)
+    base = f"https://{u.netloc}"
+    path = u.path.rstrip("/")
+    feed = f"{base}{path}/products.json" if path.startswith("/collections/") else f"{base}/products.json"
+    products, page = [], 1
+    while page <= 10:
+        status, data = jget(f"{feed}?limit=250&page={page}")
+        if status != 200 or not isinstance(data, dict):
+            print(f"  {feed} page {page} answered {status}")
+            break
+        rows = data.get("products") or []
+        products += rows
+        if len(rows) < 250:
+            break
+        page += 1
+        time.sleep(1.2)
+    print(f"CATALOGUE — {len(products)} products in {feed}")
+    since = datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
+
+    def published(p):
+        try:
+            return datetime.fromisoformat((p.get("published_at") or "").replace("Z", "+00:00"))
+        except ValueError:
+            return None
+
+    recent = [p for p in products if (published(p) or since) > since]
+    recent.sort(key=lambda p: published(p) or since, reverse=True)
+    print(f"  {len(recent)} published in the last {RECENT_DAYS} days\n")
+
+    disagree, rows = [], []
+    for p in recent[:60]:
+        h = p.get("handle")
+        vs = [v for v in p.get("variants") or [] if v.get("id")]
+        t = sum(1 for v in vs if v.get("available") is True)
+        f = sum(1 for v in vs if v.get("available") is False)
+        m = sum(1 for v in vs if "available" not in v)
+        tags = p.get("tags") or []
+        tags = tags if isinstance(tags, list) else [x.strip() for x in str(tags).split(",")]
+        flagged = [x for x in tags if MARKER.search(x)]
+        time.sleep(1.2)
+        js_status, js = jget(f"{base}/products/{h}.js")
+        js_avail = js.get("available") if isinstance(js, dict) else f"({js_status})"
+        time.sleep(1.2)
+        pv = page_view(base, h)
+        feed_buyable = t > 0 or (m > 0 and f == 0)
+        page_says_no = pv.get("form_soon") or pv.get("disabled") or not pv.get("form") \
+            or (pv.get("ld") and "InStock" not in pv["ld"] and pv["ld"] != ["-"])
+        row = dict(handle=h, title=p.get("title"), published=p.get("published_at"),
+                   created=p.get("created_at"), feed=f"{t}/{f}/{m}", js=js_avail,
+                   tags=flagged, **pv)
+        rows.append(row)
+        if feed_buyable and page_says_no:
+            disagree.append((row, vs))
+        print(f"{h}")
+        print(f"   {p.get('title')} · published {p.get('published_at')} · created {p.get('created_at')}")
+        print(f"   feed variants true/false/missing {t}/{f}/{m} · .js available {js_avail} · "
+              f"marker tags {flagged or '-'}")
+        print(f"   page {pv.get('page')} · form {pv.get('form')} · button '{pv.get('button')}'"
+              f"{' DISABLED' if pv.get('disabled') else ''} · form says coming soon "
+              f"{pv.get('form_soon')} · notify {pv.get('form_notify')} · "
+              f"page 'coming soon' x{pv.get('page_soon')} · schema {pv.get('ld')}")
+    print(f"\nall tags seen on recent products: "
+          f"{sorted({x for p in recent for x in (p.get('tags') or [])})[:80]}")
+
+    print(f"\nFEED SAYS BUYABLE, PAGE DOES NOT: {len(disagree)} of {len(rows)}")
+    for row, vs in disagree[:3]:
+        vid = next((v["id"] for v in vs if v.get("available") is not False), vs[0]["id"] if vs else None)
+        time.sleep(1.2)
+        status, why = cart_accepts(base, vid) if vid else ("-", "no variant")
+        print(f"  {row['handle']}: cart/add.js -> {status} {why}")
+        print(f"    button html: {row['button_html']}")
+    return 0
+
+
 def app_view(url):
     """The app's own answer, through the code the server runs."""
     try:
@@ -209,6 +362,8 @@ def main():
     if status != 200:
         print(f"the destination answered {status}")
         return 1
+    if is_listing(final):
+        return collection_view(final)
     if not shopify_product(final):
         describe_page(final, body)
     return app_view(url)
