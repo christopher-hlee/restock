@@ -204,6 +204,12 @@ def page_view(base, handle):
     button = buttons[0] if buttons else ""
     text = re.sub(r"<[^>]+>", " ", button)
     text = re.sub(r"\s+", " ", html.unescape(text)).strip()
+    try:                                  # the detector the server runs
+        sys.path.insert(0, ".")
+        from monitor.strategies.shopify import page_coming_soon
+        app_soon = page_coming_soon(body)
+    except ImportError:
+        app_soon = "n/a"
     ld = []
     for block in LD.findall(body):
         ld += re.findall(r'"availability"\s*:\s*"([^"]+)"', block)
@@ -215,6 +221,7 @@ def page_view(base, handle):
         "form_soon": bool(re.search(r"coming\s+soon", form, re.I)),
         "form_notify": bool(re.search(r"notify\s+me", form, re.I)),
         "page_soon": len(re.findall(r"coming\s+soon", body, re.I)),
+        "app_soon": app_soon,
         "ld": sorted({a.rsplit("/", 1)[-1] for a in ld}) or ["-"],
         "button_html": re.sub(r"\s+", " ", button)[:300],
         "soon_html": soon_contexts(body),
@@ -305,11 +312,15 @@ def collection_view(final):
         print(f"   page {pv.get('page')} · form {pv.get('form')} · button '{pv.get('button')}'"
               f"{' DISABLED' if pv.get('disabled') else ''} · form says coming soon "
               f"{pv.get('form_soon')} · notify {pv.get('form_notify')} · "
-              f"page 'coming soon' x{pv.get('page_soon')} · schema {pv.get('ld')}")
+              f"page 'coming soon' x{pv.get('page_soon')} · schema {pv.get('ld')} · "
+              f"app detector says Coming soon {pv.get('app_soon')}")
     print(f"\nall tags seen on recent products: "
           f"{sorted({x for p in recent for x in (p.get('tags') or [])})[:80]}")
 
     print(f"\nFEED SAYS BUYABLE, PAGE SAYS NOT OR 'COMING SOON': {len(disagree)} of {len(rows)}")
+    print(f"THE APP'S DETECTOR SAYS COMING SOON: "
+          f"{sum(1 for r in rows if r.get('app_soon') is True)} of {len(rows)} "
+          f"({sum(1 for r, _ in disagree if r.get('app_soon') is True)} of the disagreements)")
     for row, vs in disagree[:3]:
         print(f"\n  {row['handle']} — where 'Coming soon' is on the page:")
         for snip in row.get("soon_html") or []:
